@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Your Cake – Tropical Taste | Calgary, AB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;700&family=Montserrat:wght@300;400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --coral:#FF6B6B;--pink:#FF2D8B;--purple:#7C3AED;
+  --golden:#F59E0B;--teal:#0D9488;
+  --f-elegant:'Playfair Display',serif;--f-play:'Dancing Script',cursive;
+  --f-mod:'Montserrat',sans-serif;--f-logo:'Pacifico',cursive;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;padding-top:72px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#08000f}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:.85rem 2.5rem;background:rgba(8,0,20,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.1)}
+.nav-logo{font-family:var(--f-logo);font-size:1.7rem;color:#fff;text-decoration:none;text-shadow:0 0 30px rgba(255,107,107,.7);white-space:nowrap}
+.nav-links{display:flex;gap:1.8rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,.75);text-decoration:none;font-size:.8rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{color:var(--coral)}
+.nav-right{display:flex;align-items:center;gap:.8rem}
+.cart-link{position:relative;display:flex;align-items:center;gap:.5rem;background:none;border:1.5px solid rgba(255,255,255,.35);border-radius:50px;padding:.4rem 1rem;color:#fff;text-decoration:none;font-family:var(--f-mod);font-size:.8rem;font-weight:600;transition:all .2s}
+.cart-link:hover{background:rgba(255,255,255,.1);border-color:#fff}
+.cart-badge{position:absolute;top:-8px;right:-8px;background:var(--coral);color:#fff;border-radius:50%;width:20px;height:20px;font-size:.65rem;font-weight:700;display:none;align-items:center;justify-content:center}
+.cart-badge.show{display:flex}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px;-webkit-tap-highlight-color:transparent}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* HERO BANNER */
+.hero-banner{background:linear-gradient(140deg,#4C1D95 0%,#FF2D8B 60%,#FF6B6B 100%);padding:3rem 2rem;text-align:center;position:relative;overflow:hidden}
+.hero-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.07),transparent 70%)}
+.banner-lbl{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.75;margin-bottom:.5rem}
+.banner-ttl{font-family:var(--f-elegant);font-size:clamp(2rem,6vw,3.5rem);font-weight:700;line-height:1.1;margin-bottom:.5rem}
+.banner-sub{font-size:.9rem;opacity:.8;max-width:520px;margin:0 auto}
+
+/* MAIN LAYOUT */
+.main{max-width:1200px;margin:0 auto;padding:3rem 1.5rem 5rem;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+
+/* CONTROLS */
+.ctrl-group{margin-bottom:1.8rem}
+.ctrl-lbl{font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem}
+.ctrl-lbl span{background:var(--pink);color:#fff;border-radius:50%;width:20px;height:20px;font-size:.68rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Cake design options */
+.cake-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
+.cake-opt{border:2px solid rgba(255,255,255,.12);border-radius:14px;padding:1rem .5rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.04);-webkit-tap-highlight-color:transparent;user-select:none}
+.cake-opt:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.08)}
+.cake-opt.sel{border-color:var(--pink);background:rgba(255,45,139,.15)}
+.cake-opt-em{font-size:1.8rem;display:block;margin-bottom:.3rem}
+.cake-opt-nm{font-size:.72rem;font-weight:700;line-height:1.3}
+.cake-opt-pr{font-size:.65rem;color:var(--golden);margin-top:.15rem}
+
+/* Font options */
+.font-opts{display:flex;gap:.7rem}
+.font-opt{flex:1;border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:.75rem .5rem;text-align:center;cursor:pointer;background:rgba(255,255,255,.04);transition:all .2s;-webkit-tap-highlight-color:transparent;user-select:none}
+.font-opt:hover{border-color:rgba(255,255,255,.28)}
+.font-opt.sel{border-color:var(--coral);background:rgba(255,107,107,.12)}
+.font-opt-prev{font-size:1.1rem;color:#fff;margin-bottom:.2rem}
+.font-opt-lbl{font-size:.64rem;opacity:.5;text-transform:uppercase;letter-spacing:.08em}
+
+/* Text input */
+.txt-inp{width:100%;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);border-radius:12px;padding:.85rem 1.1rem;color:#fff;font-family:var(--f-mod);font-size:.95rem;outline:none;transition:border-color .2s}
+.txt-inp::placeholder{color:rgba(255,255,255,.3)}
+.txt-inp:focus{border-color:var(--pink)}
+.char-count{font-size:.68rem;opacity:.4;text-align:right;margin-top:.3rem}
+
+/* Size options */
+.size-opts{display:flex;gap:.7rem}
+.size-opt{flex:1;border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:.7rem .4rem;text-align:center;cursor:pointer;background:rgba(255,255,255,.04);transition:all .2s;-webkit-tap-highlight-color:transparent;user-select:none}
+.size-opt:hover{border-color:rgba(255,255,255,.28)}
+.size-opt.sel{border-color:var(--golden);background:rgba(245,158,11,.12)}
+.size-opt-nm{font-size:.82rem;font-weight:700}
+.size-opt-srv{font-size:.65rem;opacity:.42;margin:.1rem 0}
+.size-opt-pr{font-size:.78rem;color:var(--golden);font-weight:700}
+
+/* Qty */
+.qty-row{display:flex;align-items:center;gap:1rem}
+.qty-btn{width:38px;height:38px;border-radius:50%;border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;-webkit-tap-highlight-color:transparent;line-height:1;user-select:none}
+.qty-btn:hover{background:rgba(255,255,255,.18);border-color:#fff}
+.qty-val{font-size:1.2rem;font-weight:700;min-width:30px;text-align:center}
+
+/* Generate preview */
+.gen-btn{width:100%;background:linear-gradient(135deg,var(--purple),#3B0764);color:#fff;border:none;padding:1.05rem 2rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.95rem;cursor:pointer;letter-spacing:.04em;transition:all .3s;margin-top:.5rem;-webkit-tap-highlight-color:transparent}
+.gen-btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(124,58,237,.45)}
+.gen-btn:active{transform:translateY(0)}
+/* Add to cart */
+.atc-btn{width:100%;background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:1.05rem 2rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.95rem;cursor:pointer;letter-spacing:.04em;transition:all .3s;margin-top:.6rem;-webkit-tap-highlight-color:transparent}
+.atc-btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(255,45,139,.4)}
+.atc-btn:active{transform:translateY(0)}
+
+/* Info note */
+.info-note{background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:12px;padding:.9rem 1rem;font-size:.78rem;line-height:1.6;color:rgba(255,255,255,.65);margin-top:1rem;display:flex;gap:.6rem;align-items:flex-start}
+
+/* PREVIEW PANEL */
+.preview-panel{position:sticky;top:90px}
+.preview-lbl{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);text-align:center;margin-bottom:.9rem}
+.canvas-wrap{position:relative;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+#cakeCanvas{width:100%;display:block;border-radius:20px}
+.gen-overlay{position:absolute;inset:0;background:rgba(10,0,25,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;opacity:0;transition:opacity .25s;pointer-events:none;border-radius:20px}
+.gen-overlay.on{opacity:1}
+.gen-spin{width:44px;height:44px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gen-txt{font-size:.82rem;letter-spacing:.1em;color:rgba(255,255,255,.6)}
+.preview-note{text-align:center;margin-top:.9rem;font-size:.75rem;color:rgba(255,255,255,.35);line-height:1.6}
+.price-display{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:1rem 1.2rem;margin-top:1.2rem;display:flex;align-items:center;justify-content:space-between}
+.pd-label{font-size:.78rem;opacity:.6}
+.pd-price{font-size:1.4rem;font-weight:700;color:var(--golden)}
+.pd-per{font-size:.65rem;opacity:.4;margin-top:.1rem;text-align:right}
+
+/* FOOTER */
+footer{background:linear-gradient(160deg,#0c0020 0%,#040408 100%);padding:3rem 2rem 2rem;text-align:center}
+.ft-logo{font-family:var(--f-logo);font-size:2rem;color:#fff;text-shadow:0 0 30px rgba(255,107,107,.5);margin-bottom:.3rem}
+.ft-tag{font-family:var(--f-elegant);font-style:italic;font-size:.85rem;opacity:.4;margin-bottom:1.8rem}
+.ft-links{display:flex;justify-content:center;gap:1.8rem;flex-wrap:wrap;margin-bottom:1.8rem}
+.ft-links a{color:rgba(255,255,255,.4);text-decoration:none;font-size:.78rem;transition:color .2s}
+.ft-links a:hover{color:#fff}
+.ft-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:1.3rem;font-size:.72rem;opacity:.3}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120px);background:#160028;border:1px solid rgba(255,255,255,.15);color:#fff;padding:.8rem 1.4rem;border-radius:50px;font-size:.85rem;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:.6rem;box-shadow:0 10px 40px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* SUCCESS BANNER */
+.success-bar{background:linear-gradient(135deg,rgba(13,148,136,.2),rgba(245,158,11,.1));border:1px solid rgba(13,148,136,.4);border-radius:14px;padding:1rem 1.2rem;margin-top:1rem;display:none;align-items:center;gap:.9rem;font-size:.85rem;color:rgba(255,255,255,.85)}
+.success-bar.show{display:flex}
+.success-bar a{color:var(--golden);font-weight:700;text-decoration:none}
+
+@media(max-width:900px){.main{grid-template-columns:1fr;gap:2rem}}
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(10,0,25,.98);padding:1.2rem 1.8rem;gap:1.2rem;border-top:1px solid rgba(255,255,255,.08);z-index:999}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+  .navbar{padding:.75rem 1.2rem}
+  .preview-panel{position:static;order:-1}
+  .cake-opts{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:480px){
+  .cake-opts{grid-template-columns:1fr}
+  .font-opts{flex-direction:column}
+  .size-opts{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" href="index.html">Tropical Taste</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="menu.html">Menu</a></li>
+    <li><a href="customize.html" class="active">Design a Cake</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="cart-link" href="cart.html">🛒 Cart<span class="cart-badge" id="cartBadge"></span></a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <div class="banner-lbl">✦ AI-Powered Preview ✦</div>
+  <h1 class="banner-ttl">Design Your Dream Cake</h1>
+  <p class="banner-sub">Pick a flavour, choose your font, type your message — see your cake come to life in real time</p>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- CONTROLS -->
+  <div id="controls">
+    <div class="ctrl-group">
+      <div class="ctrl-lbl"><span>1</span> Choose Flavour &amp; Design</div>
+      <div class="cake-opts">
+        <div class="cake-opt sel" data-design="choco">
+          <span class="cake-opt-em">🍓🍫</span>
+          <div class="cake-opt-nm">Strawberry &amp; Chocolate</div>
+          <div class="cake-opt-pr">From $45</div>
+        </div>
+        <div class="cake-opt" data-design="velvet">
+          <span class="cake-opt-em">🍰❤️</span>
+          <div class="cake-opt-nm">Red Velvet</div>
+          <div class="cake-opt-pr">From $48</div>
+        </div>
+        <div class="cake-opt" data-design="carrot">
+          <span class="cake-opt-em">🥕🍂</span>
+          <div class="cake-opt-nm">Carrot Cake</div>
+          <div class="cake-opt-pr">From $45</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-lbl"><span>2</span> Choose Font Style</div>
+      <div class="font-opts">
+        <div class="font-opt sel" data-font="elegant">
+          <div class="font-opt-prev" style="font-family:'Playfair Display',serif;font-style:italic">Happy!</div>
+          <div class="font-opt-lbl">Elegant</div>
+        </div>
+        <div class="font-opt" data-font="playful">
+          <div class="font-opt-prev" style="font-family:'Dancing Script',cursive">Happy!</div>
+          <div class="font-opt-lbl">Playful</div>
+        </div>
+        <div class="font-opt" data-font="modern">
+          <div class="font-opt-prev" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:.9rem;letter-spacing:.02em">Happy!</div>
+          <div class="font-opt-lbl">Modern</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-lbl"><span>3</span> Your Cake Message</div>
+      <input class="txt-inp" id="cakeText" type="text" maxlength="30" placeholder="e.g. Happy Birthday Sofia! 🎂">
+      <div class="char-count"><span id="charLeft">30</span> characters remaining</div>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-lbl"><span>4</span> Select Size</div>
+      <div class="size-opts">
+        <div class="size-opt" data-price="45" data-label='6"'>
+          <div class="size-opt-nm">6"</div>
+          <div class="size-opt-srv">Serves 8–10</div>
+          <div class="size-opt-pr">$45</div>
+        </div>
+        <div class="size-opt sel" data-price="65" data-label='8"'>
+          <div class="size-opt-nm">8"</div>
+          <div class="size-opt-srv">Serves 15–20</div>
+          <div class="size-opt-pr">$65</div>
+        </div>
+        <div class="size-opt" data-price="85" data-label='10"'>
+          <div class="size-opt-nm">10"</div>
+          <div class="size-opt-srv">Serves 25–30</div>
+          <div class="size-opt-pr">$85</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-lbl"><span>5</span> Quantity</div>
+      <div class="qty-row">
+        <button class="qty-btn" id="qtyMinus">−</button>
+        <div class="qty-val" id="qtyVal">1</div>
+        <button class="qty-btn" id="qtyPlus">+</button>
+        <span style="font-size:.82rem;opacity:.45;margin-left:.4rem">cake(s)</span>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="genBtn">✨ Generate Preview</button>
+    <button class="atc-btn" id="atcBtn">🛒 Add to Cart — <span id="atcPrice">$65</span></button>
+
+    <div class="success-bar" id="successBar">
+      <span>✅</span>
+      <span>Added to your cart! <a href="cart.html">View cart →</a></span>
+    </div>
+
+    <div class="info-note">
+      <span>🎨</span>
+      <span>Preview is illustrative. Your actual cake is crafted by our pastry chefs with premium ingredients and your exact specifications.</span>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview-panel">
+    <div class="preview-lbl">✦ Live AI Preview ✦</div>
+    <div class="canvas-wrap">
+      <canvas id="cakeCanvas" width="400" height="480"></canvas>
+      <div class="gen-overlay" id="genOverlay">
+        <div class="gen-spin"></div>
+        <div class="gen-txt">Rendering your cake…</div>
+      </div>
+    </div>
+    <div class="price-display">
+      <div><div class="pd-label">Your total</div><div class="pd-price" id="totalPrice">$65</div></div>
+      <div style="text-align:right"><div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.85)" id="summaryText">8" Cake · 1×</div><div class="pd-per">48 hr advance notice required</div></div>
+    </div>
+    <div class="preview-note">All cakes made fresh to order in Calgary. Pickup or delivery available across the city.</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-logo">Tropical Taste</div>
+  <p class="ft-tag">Authentic Latin Pastry — Calgary, Alberta</p>
+  <div class="ft-links">
+    <a href="index.html">Home</a><a href="menu.html">Menu</a>
+    <a href="contact.html">Contact</a><a href="cart.html">Cart</a>
+  </div>
+  <div class="ft-bottom">&copy; 2025 Tropical Taste · Calgary, AB · 48 hr advance order required 🌺</div>
+</footer>
+
+<div class="toast" id="toast"><span id="toastIco"></span><span id="toastMsg"></span></div>
+
+<script>
+/* ── STATE ── */
+let design = 'choco', font = 'elegant', sizePrice = 65, sizeLabel = '8"', qty = 1;
+
+/* ── DESIGN OPTIONS ── */
+document.querySelectorAll('.cake-opt').forEach(el=>{
+  el.addEventListener('click',function(){
+    document.querySelectorAll('.cake-opt').forEach(o=>o.classList.remove('sel'));
+    this.classList.add('sel');
+    design = this.dataset.design;
+  });
+});
+
+/* ── FONT OPTIONS ── */
+document.querySelectorAll('.font-opt').forEach(el=>{
+  el.addEventListener('click',function(){
+    document.querySelectorAll('.font-opt').forEach(o=>o.classList.remove('sel'));
+    this.classList.add('sel');
+    font = this.dataset.font;
+  });
+});
+
+/* ── SIZE OPTIONS ── */
+document.querySelectorAll('.size-opt').forEach(el=>{
+  el.addEventListener('click',function(){
+    document.querySelectorAll('.size-opt').forEach(o=>o.classList.remove('sel'));
+    this.classList.add('sel');
+    sizePrice = +this.dataset.price;
+    sizeLabel = this.dataset.label;
+    updatePrice();
+  });
+});
+
+/* ── TEXT INPUT ── */
+document.getElementById('cakeText').addEventListener('input',function(){
+  document.getElementById('charLeft').textContent = 30 - this.value.length;
+});
+
+/* ── GENERATE PREVIEW ── */
+document.getElementById('genBtn').addEventListener('click', triggerDraw);
+
+/* ── QTY ── */
+document.getElementById('qtyMinus').addEventListener('click',()=>{ if(qty>1){qty--;updateQty();} });
+document.getElementById('qtyPlus').addEventListener('click',()=>{ if(qty<10){qty++;updateQty();} });
+function updateQty(){ document.getElementById('qtyVal').textContent=qty; updatePrice(); }
+function updatePrice(){
+  const total = sizePrice * qty;
+  document.getElementById('atcPrice').textContent = `$${total}`;
+  document.getElementById('totalPrice').textContent = `$${total.toFixed(2)}`;
+  document.getElementById('summaryText').textContent = `${sizeLabel} Cake · ${qty}×`;
+}
+
+/* ── ADD TO CART ── */
+document.getElementById('atcBtn').addEventListener('click', async () => {
+  const designNames = {choco:'Strawberry & Chocolate',velvet:'Red Velvet',carrot:'Carrot Cake'};
+  const fontNames   = {elegant:'Elegant',playful:'Playful',modern:'Modern'};
+  const txt   = document.getElementById('cakeText').value.trim();
+  const emoji = design==='choco'?'🍓🍫':design==='velvet'?'🍰':'🥕';
+
+  // Object saved to localStorage (cart schema)
+  const item = {
+    id:      Date.now(),
+    type:    'custom',
+    name:    `${designNames[design]} Cake (${sizeLabel})`,
+    emoji,
+    details: `Font: ${fontNames[font]}${txt?` · "${txt}"` : ''}`,
+    price:   sizePrice,
+    qty,
+  };
+
+  // 1. Save to localStorage so the cart page can read it
+  const cart = JSON.parse(localStorage.getItem('tt_cart')||'[]');
+  cart.push(item);
+  localStorage.setItem('tt_cart', JSON.stringify(cart));
+  updateBadge();
+
+  // 2. Send full details to the backend endpoint
+  //    Includes extra fields (design, font, message, sizeLabel) useful for the server log.
+  //    Wrapped in try/catch so the cart still works if the server is offline.
+  try {
+    const payload = {
+      ...item,
+      design,
+      font,
+      message:   txt,
+      sizeLabel,
+    };
+    const res = await fetch('/api/cart', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      console.warn('Server responded with status', res.status);
+    }
+  } catch (err) {
+    // Server unreachable — cart still works via localStorage
+    console.warn('Backend not reachable, item saved locally only:', err.message);
+  }
+
+  // 3. UI feedback
+  document.getElementById('successBar').classList.add('show');
+  showToast(emoji, 'Cake added to cart!');
+  setTimeout(()=>document.getElementById('successBar').classList.remove('show'), 5000);
+});
+
+/* ── BADGE ── */
+function updateBadge(){
+  const c=JSON.parse(localStorage.getItem('tt_cart')||'[]');
+  const n=c.reduce((s,i)=>s+(i.qty||1),0);
+  const b=document.getElementById('cartBadge');
+  if(b){b.textContent=n;b.classList.toggle('show',n>0);}
+}
+
+/* ── HAMBURGER ── */
+document.getElementById('hamburger').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+/* ── CANVAS DRAWING ── */
+function triggerDraw(){
+  const ov=document.getElementById('genOverlay');
+  ov.classList.add('on');
+  setTimeout(()=>{ drawCake(); ov.classList.remove('on'); }, 600);
+}
+function lighten(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  return `rgb(${Math.min(255,((n>>16)&0xff)+amt)},${Math.min(255,((n>>8)&0xff)+amt)},${Math.min(255,(n&0xff)+amt)})`;
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+function drawStrawberry(ctx,x,y,r){
+  ctx.save();
+  ctx.fillStyle='#DC143C';
+  ctx.beginPath();ctx.arc(x,y,r*.85,Math.PI,Math.PI*2);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.arc(x,y-r*.2,r*.55,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#228B22';
+  const lw=ctx.lineWidth;ctx.lineWidth=2;
+  ctx.strokeStyle='#228B22';
+  ctx.beginPath();ctx.moveTo(x,y-r*.8);ctx.lineTo(x,y-r*1.4);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x,y-r*1.1);ctx.lineTo(x-r*.4,y-r*1.4);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x,y-r*1.1);ctx.lineTo(x+r*.4,y-r*1.4);ctx.stroke();
+  ctx.lineWidth=lw;
+  ctx.fillStyle='rgba(255,255,255,.3)';
+  ctx.beginPath();ctx.arc(x-r*.25,y-r*.3,r*.15,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+function drawRosette(ctx,x,y,r,color){
+  ctx.save();ctx.fillStyle=color;
+  for(let i=0;i<7;i++){
+    const a=i*Math.PI*2/7;
+    ctx.beginPath();ctx.arc(x+Math.cos(a)*r*.55,y+Math.sin(a)*r*.55,r*.45,0,Math.PI*2);ctx.fill();
+  }
+  ctx.beginPath();ctx.arc(x,y,r*.4,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+function drawCarrot(ctx,x,y,size){
+  ctx.save();
+  ctx.fillStyle='#FF8C00';
+  ctx.beginPath();ctx.moveTo(x,y-size);ctx.lineTo(x+size*.45,y+size*.2);ctx.lineTo(x-size*.45,y+size*.2);ctx.closePath();ctx.fill();
+  const g=ctx.createLinearGradient(x-size*.45,0,x+size*.45,0);
+  g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.2)');g.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.moveTo(x,y-size);ctx.lineTo(x+size*.45,y+size*.2);ctx.lineTo(x-size*.45,y+size*.2);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#2E7D32';ctx.strokeStyle='#2E7D32';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(x,y-size*.7);ctx.lineTo(x-size*.3,y-size*1.3);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x,y-size*.7);ctx.lineTo(x+size*.25,y-size*1.25);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x,y-size*.7);ctx.lineTo(x,y-size*1.4);ctx.stroke();
+  ctx.restore();
+}
+function drawCandle(ctx,x,y){
+  ctx.save();
+  const cg=ctx.createLinearGradient(x-4,y-24,x+4,y-6);
+  cg.addColorStop(0,'#FFD700');cg.addColorStop(1,'#FFA500');
+  ctx.fillStyle=cg;roundRect(ctx,x-3,y-24,6,20,2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(x-1,y-22,2,16);
+  ctx.fillStyle='#FF8C00';
+  ctx.beginPath();ctx.ellipse(x,y-28,4,7,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#FFD700';
+  ctx.beginPath();ctx.ellipse(x,y-30,2,4,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff8';
+  ctx.beginPath();ctx.ellipse(x,y-31,1,2.5,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+function drawCake(){
+  const canvas=document.getElementById('cakeCanvas');
+  const ctx=canvas.getContext('2d');
+  const W=400,H=480;
+  ctx.clearRect(0,0,W,H);
+  const defs={
+    choco:{layers:['#3D1A07','#5C2A10','#7A3518'],frost:'#FFB6C1',top:'#1a0905',name:'Strawberry & Chocolate'},
+    velvet:{layers:['#6B0000','#8B0000','#A30000'],frost:'#F5F5F5',top:'#5a0000',name:'Red Velvet'},
+    carrot:{layers:['#8B4513','#A0522D','#B5651D'],frost:'#FFFACD',top:'#6b3410',name:'Carrot Cake'},
+  };
+  const d=defs[design];
+  // BG glow
+  const bg=ctx.createRadialGradient(200,240,0,200,240,230);
+  bg.addColorStop(0,'rgba(255,180,80,.07)');bg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  // Tiers
+  const tiers=[{x:80,y:342,w:240,h:72},{x:95,y:270,w:210,h:72},{x:110,y:198,w:180,h:72}];
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=28;ctx.shadowOffsetY=8;
+  tiers.forEach((t,i)=>{
+    const cg=ctx.createLinearGradient(t.x,t.y,t.x+t.w,t.y+t.h);
+    cg.addColorStop(0,d.layers[i]);cg.addColorStop(.45,lighten(d.layers[i],22));cg.addColorStop(1,d.layers[i]);
+    ctx.fillStyle=cg;roundRect(ctx,t.x,t.y+8,t.w,t.h-8,7);ctx.fill();
+    // Frosting top band
+    ctx.shadowBlur=0;
+    const fg=ctx.createLinearGradient(t.x-2,t.y,t.x+t.w+2,t.y+14);
+    fg.addColorStop(0,d.frost);fg.addColorStop(.5,lighten(d.frost.replace('#','#'),-10)||d.frost);fg.addColorStop(1,d.frost);
+    ctx.fillStyle=fg;roundRect(ctx,t.x-1,t.y,t.w+2,14,5);ctx.fill();
+    // Drips
+    ctx.fillStyle=d.frost+'bb';
+    for(let j=0;j<4;j++){
+      const drx=t.x+18+j*(t.w-36)/3;
+      const drh=8+((i+j)%3)*6;
+      roundRect(ctx,drx,t.y+12,5,drh,2);ctx.fill();
+    }
+  });
+  ctx.restore();
+  // Plate
+  const platG=ctx.createLinearGradient(50,430,350,455);
+  platG.addColorStop(0,'#ddd');platG.addColorStop(.5,'#fff');platG.addColorStop(1,'#ccc');
+  ctx.save();ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=18;ctx.shadowOffsetY=4;
+  ctx.fillStyle=platG;ctx.beginPath();ctx.ellipse(200,432,172,18,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  // Decorations
+  const top=tiers[2];const cx=top.x+top.w/2;
+  if(design==='choco'){
+    const sxs=[cx-50,cx-18,cx+18,cx+50];
+    sxs.forEach(sx=>drawStrawberry(ctx,sx,top.y-2,13));
+    ctx.fillStyle=d.top+'cc';
+    for(let i=0;i<6;i++){const dx=top.x+12+i*28;roundRect(ctx,dx,top.y,5,10+i%3*4,2);ctx.fill();}
+  } else if(design==='velvet'){
+    [cx-48,cx,cx+48].forEach(rx=>drawRosette(ctx,rx,top.y-2,11,'#fff'));
+    ctx.fillStyle='#6B0000';
+    for(let i=0;i<18;i++){ctx.fillRect(top.x+8+Math.random()*155,top.y-1,3+Math.random()*3,3);}
+  } else {
+    [cx-42,cx,cx+42].forEach(ccx=>drawCarrot(ctx,ccx,top.y-2,14));
+    drawRosette(ctx,top.x+top.w-14,top.y-2,10,'#FFFACD');
+    drawRosette(ctx,top.x+14,top.y-2,10,'#FFFACD');
+  }
+  // Candles
+  [cx-28,cx,cx+28].forEach(candleX=>drawCandle(ctx,candleX,top.y));
+  // Text
+  const txt=document.getElementById('cakeText').value.trim();
+  if(txt){
+    const sz=txt.length<=10?21:txt.length<=18?16:12;
+    const fontMap={
+      elegant:`italic 700 ${sz}px 'Playfair Display',serif`,
+      playful:`700 ${sz+4}px 'Dancing Script',cursive`,
+      modern:`900 ${sz-2}px 'Montserrat',sans-serif`,
+    };
+    ctx.save();
+    ctx.font=fontMap[font]||fontMap.elegant;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const ty=top.y+top.h/2+8;
+    ctx.shadowColor='rgba(0,0,0,.7)';ctx.shadowBlur=10;ctx.shadowOffsetY=1;
+    ctx.fillStyle='#ffffff';
+    ctx.fillText(txt,cx,ty,top.w-16);
+    ctx.restore();
+  }
+  // Watermark
+  ctx.save();
+  ctx.font="500 10px 'Montserrat',sans-serif";
+  ctx.fillStyle='rgba(255,255,255,.2)';
+  ctx.textAlign='center';
+  ctx.fillText(d.name+' · Tropical Taste YYC',200,468);
+  ctx.restore();
+}
+
+/* ── TOAST ── */
+let toastTimer;
+function showToast(ico,msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastIco').textContent=ico;
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* ── INIT ── */
+updateBadge();
+document.fonts.ready.then(()=>triggerDraw());
+</script>
+</body>
+</html>

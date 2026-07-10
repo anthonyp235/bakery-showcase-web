@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu – Tropical Taste | Calgary, AB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Dancing+Script:wght@700&family=Montserrat:wght@300;400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --coral:#FF6B6B;--pink:#FF2D8B;--purple:#7C3AED;--dpurple:#4C1D95;
+  --teal:#0D9488;--golden:#F59E0B;
+  --f-elegant:'Playfair Display',serif;--f-mod:'Montserrat',sans-serif;--f-logo:'Pacifico',cursive;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;padding-top:72px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#08000f}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:.85rem 2.5rem;background:rgba(8,0,20,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.1)}
+.nav-logo{font-family:var(--f-logo);font-size:1.7rem;color:#fff;text-decoration:none;text-shadow:0 0 30px rgba(255,107,107,.7);white-space:nowrap}
+.nav-links{display:flex;gap:1.8rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,.75);text-decoration:none;font-size:.8rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{color:var(--coral)}
+.nav-right{display:flex;align-items:center;gap:.8rem}
+.cart-link{position:relative;display:flex;align-items:center;gap:.5rem;background:none;border:1.5px solid rgba(255,255,255,.35);border-radius:50px;padding:.4rem 1rem;color:#fff;text-decoration:none;font-family:var(--f-mod);font-size:.8rem;font-weight:600;transition:all .2s}
+.cart-link:hover{background:rgba(255,255,255,.1);border-color:#fff}
+.cart-badge{position:absolute;top:-8px;right:-8px;background:var(--coral);color:#fff;border-radius:50%;width:20px;height:20px;font-size:.65rem;font-weight:700;display:none;align-items:center;justify-content:center}
+.cart-badge.show{display:flex}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px;-webkit-tap-highlight-color:transparent}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* HERO BANNER */
+.hero-banner{background:linear-gradient(140deg,#7C3AED 0%,#FF2D8B 60%,#FF6B6B 100%);padding:3.5rem 2rem;text-align:center;position:relative;overflow:hidden}
+.hero-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.08),transparent 70%)}
+.banner-lbl{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.75;margin-bottom:.5rem}
+.banner-ttl{font-family:var(--f-elegant);font-size:clamp(2rem,6vw,3.5rem);font-weight:700;line-height:1.1;margin-bottom:.5rem}
+.banner-sub{font-size:.9rem;opacity:.8;max-width:500px;margin:0 auto}
+
+/* TABS */
+.tab-bar{background:rgba(0,0,0,.4);backdrop-filter:blur(10px);position:sticky;top:70px;z-index:100;border-bottom:1px solid rgba(255,255,255,.08)}
+.tab-inner{display:flex;overflow-x:auto;gap:0;max-width:1200px;margin:0 auto;scrollbar-width:none}
+.tab-inner::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;background:none;border:none;color:rgba(255,255,255,.55);padding:1rem 1.5rem;font-family:var(--f-mod);font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.tab-btn:hover{color:rgba(255,255,255,.85)}
+.tab-btn.active{color:#fff;border-bottom-color:var(--coral)}
+
+/* CONTENT */
+.menu-content{max-width:1200px;margin:0 auto;padding:3rem 1.5rem 5rem}
+.menu-section{display:none}
+.menu-section.active{display:block;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.menu-sec-hdr{margin-bottom:2rem}
+.menu-sec-ttl{font-family:var(--f-elegant);font-size:2rem;font-weight:700;margin-bottom:.4rem}
+.menu-sec-sub{font-size:.88rem;opacity:.6;line-height:1.65}
+
+/* PRODUCT GRID */
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.4rem}
+.prod-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden;transition:transform .3s,border-color .3s}
+.prod-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.2)}
+.prod-img{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;overflow:hidden}
+.prod-img-choco{background:linear-gradient(135deg,#3D1A07,#7A3518)}
+.prod-img-velvet{background:linear-gradient(135deg,#6B0000,#A50000)}
+.prod-img-carrot{background:linear-gradient(135deg,#8B4513,#B5651D)}
+.prod-img-default{background:linear-gradient(135deg,rgba(255,107,107,.15),rgba(124,58,237,.15))}
+.prod-badge{position:absolute;top:.7rem;left:.7rem;background:var(--coral);color:#fff;font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.25rem .6rem;border-radius:50px}
+.prod-info{padding:1.1rem 1.2rem 1.2rem}
+.prod-nm{font-weight:700;font-size:.95rem;margin-bottom:.3rem}
+.prod-desc{font-size:.77rem;opacity:.55;line-height:1.55;margin-bottom:.9rem}
+.prod-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+.prod-tag{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:.2rem .6rem;font-size:.65rem;font-weight:600;opacity:.75}
+.prod-ft{display:flex;align-items:center;justify-content:space-between}
+.prod-pr{font-weight:700;color:var(--golden);font-size:1.05rem}
+.atc-btn{background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:.5rem 1.1rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.78rem;cursor:pointer;transition:all .25s;-webkit-tap-highlight-color:transparent}
+.atc-btn:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(255,45,139,.35)}
+.atc-btn:active{transform:scale(.97)}
+
+/* SIZE MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-ov.on{opacity:1;pointer-events:all}
+.modal{background:#0e0020;border:1px solid rgba(255,255,255,.12);border-radius:24px 24px 0 0;width:100%;max-width:500px;padding:2rem 1.5rem 2.5rem;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.modal-ov.on .modal{transform:translateY(0)}
+.modal-ttl{font-size:1.1rem;font-weight:700;margin-bottom:.4rem}
+.modal-desc{font-size:.8rem;opacity:.5;margin-bottom:1.5rem}
+.size-row{display:flex;gap:.7rem;margin-bottom:1.5rem}
+.sz-opt{flex:1;border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:.7rem .4rem;text-align:center;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.sz-opt:hover{border-color:rgba(255,255,255,.3)}
+.sz-opt.sel{border-color:var(--golden);background:rgba(245,158,11,.12)}
+.sz-nm{font-size:.82rem;font-weight:700}
+.sz-srv{font-size:.65rem;opacity:.45;margin:.1rem 0}
+.sz-pr{font-size:.78rem;color:var(--golden);font-weight:700}
+.modal-actions{display:flex;gap:.8rem}
+.modal-cancel{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:.85rem;border-radius:50px;font-family:var(--f-mod);font-weight:600;font-size:.88rem;cursor:pointer;transition:all .2s}
+.modal-cancel:hover{background:rgba(255,255,255,.12)}
+.modal-add{flex:2;background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:.85rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s}
+.modal-add:hover{box-shadow:0 10px 30px rgba(255,45,139,.35)}
+
+/* NOTE BAR */
+.note-bar{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:14px;padding:1rem 1.2rem;margin-bottom:2rem;font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.6;display:flex;gap:.7rem;align-items:flex-start}
+.note-ico{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
+
+/* FOOTER */
+footer{background:linear-gradient(160deg,#0c0020 0%,#040408 100%);padding:3rem 2rem 2rem;text-align:center}
+.ft-logo{font-family:var(--f-logo);font-size:2rem;color:#fff;text-shadow:0 0 30px rgba(255,107,107,.5);margin-bottom:.3rem}
+.ft-tag{font-family:var(--f-elegant);font-style:italic;font-size:.85rem;opacity:.4;margin-bottom:1.8rem}
+.ft-links{display:flex;justify-content:center;gap:1.8rem;flex-wrap:wrap;margin-bottom:1.8rem}
+.ft-links a{color:rgba(255,255,255,.4);text-decoration:none;font-size:.78rem;transition:color .2s}
+.ft-links a:hover{color:#fff}
+.ft-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:1.3rem;font-size:.72rem;opacity:.3}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120px);background:#160028;border:1px solid rgba(255,255,255,.15);color:#fff;padding:.8rem 1.4rem;border-radius:50px;font-size:.85rem;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:.6rem;box-shadow:0 10px 40px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(10,0,25,.98);padding:1.2rem 1.8rem;gap:1.2rem;border-top:1px solid rgba(255,255,255,.08);z-index:999}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+  .navbar{padding:.75rem 1.2rem}
+  .size-row{flex-direction:column}
+  .modal-actions{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" href="index.html">Tropical Taste</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="menu.html" class="active">Menu</a></li>
+    <li><a href="customize.html">Design a Cake</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="cart-link" href="cart.html">🛒 Cart<span class="cart-badge" id="cartBadge"></span></a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <div class="banner-lbl">✦ Order Fresh Today ✦</div>
+  <h1 class="banner-ttl">Our Menu</h1>
+  <p class="banner-sub">Handcrafted Latin pastries made fresh in Calgary — 48 hr advance order recommended</p>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <div class="tab-inner">
+    <button class="tab-btn active" data-tab="cakes">🎂 Custom Cakes</button>
+    <button class="tab-btn" data-tab="classics">🍮 Latin Classics</button>
+    <button class="tab-btn" data-tab="pastries">🧁 Pastries &amp; Bites</button>
+    <button class="tab-btn" data-tab="packages">🎉 Party Packs</button>
+  </div>
+</div>
+
+<!-- MENU CONTENT -->
+<div class="menu-content">
+
+  <!-- CUSTOM CAKES -->
+  <div class="menu-section active" id="tab-cakes">
+    <div class="menu-sec-hdr">
+      <h2 class="menu-sec-ttl">Custom Cakes</h2>
+      <p class="menu-sec-sub">All cakes are made to order with your choice of design, message and size. <a href="customize.html" style="color:var(--coral)">Use our Cake Designer →</a></p>
+    </div>
+    <div class="note-bar">
+      <span class="note-ico">💡</span>
+      <span>Want a fully personalized cake? <a href="customize.html" style="color:var(--golden);font-weight:700">Open our Cake Designer</a> to preview your cake live before adding it to the cart.</span>
+    </div>
+    <div class="prod-grid" id="cakes">
+      <!-- Cards injected by JS -->
+    </div>
+  </div>
+
+  <!-- LATIN CLASSICS -->
+  <div class="menu-section" id="tab-classics">
+    <div class="menu-sec-hdr">
+      <h2 class="menu-sec-ttl">Latin Classics</h2>
+      <p class="menu-sec-sub">Traditional recipes passed down through generations — made with love in Calgary.</p>
+    </div>
+    <div class="prod-grid" id="classics"></div>
+  </div>
+
+  <!-- PASTRIES -->
+  <div class="menu-section" id="tab-pastries">
+    <div class="menu-sec-hdr">
+      <h2 class="menu-sec-ttl">Pastries &amp; Bites</h2>
+      <p class="menu-sec-sub">Perfect for sharing, gifting or simply treating yourself. Made fresh daily.</p>
+    </div>
+    <div class="prod-grid" id="pastries"></div>
+  </div>
+
+  <!-- PARTY PACKS -->
+  <div class="menu-section" id="tab-packages">
+    <div class="menu-sec-hdr">
+      <h2 class="menu-sec-ttl">Party Packages</h2>
+      <p class="menu-sec-sub">Everything you need for your celebration — bundled at the best value.</p>
+    </div>
+    <div class="prod-grid" id="packages"></div>
+  </div>
+
+</div>
+
+<!-- SIZE MODAL -->
+<div class="modal-ov" id="modalOv">
+  <div class="modal">
+    <div class="modal-ttl" id="mTitle"></div>
+    <div class="modal-desc" id="mDesc">Select a size to add to your cart</div>
+    <div class="size-row" id="sizeRow"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-add" onclick="confirmAdd()">Add to Cart — <span id="mPrice"></span></button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-logo">Tropical Taste</div>
+  <p class="ft-tag">Authentic Latin Pastry — Calgary, Alberta</p>
+  <div class="ft-links">
+    <a href="index.html">Home</a><a href="customize.html">Design a Cake</a>
+    <a href="contact.html">Contact</a><a href="cart.html">Cart</a>
+  </div>
+  <div class="ft-bottom">&copy; 2025 Tropical Taste · Calgary, AB · 48 hr advance order required 🌺</div>
+</footer>
+
+<div class="toast" id="toast"><span id="toastIco"></span><span id="toastMsg"></span></div>
+
+<script>
+/* ── MENU DATA ── */
+const MENU = {
+  cakes: [
+    {name:'Strawberry & Chocolate Cake',emoji:'🍓🍫',desc:'Rich chocolate layers with fresh strawberry filling, chocolate drip and cream cheese frosting.',tags:['Bestseller','Custom text'],sizes:[{l:'6"',srv:'Serves 8–10',p:45},{l:'8"',srv:'Serves 15–20',p:65},{l:'10"',srv:'Serves 25–30',p:85}],imgClass:'prod-img-choco'},
+    {name:'Red Velvet Cake',emoji:'🍰',desc:'Velvety red layers with signature cream cheese frosting and a dusting of red velvet crumbles.',tags:['Most loved','Custom text'],sizes:[{l:'6"',srv:'Serves 8–10',p:48},{l:'8"',srv:'Serves 15–20',p:68},{l:'10"',srv:'Serves 25–30',p:88}],imgClass:'prod-img-velvet',badge:'Popular'},
+    {name:'Carrot Cake',emoji:'🥕',desc:'Warmly spiced carrot cake with walnuts, finished with cream cheese rosettes and carrot decorations.',tags:['Seasonal fav.','Custom text'],sizes:[{l:'6"',srv:'Serves 8–10',p:45},{l:'8"',srv:'Serves 15–20',p:65},{l:'10"',srv:'Serves 25–30',p:85}],imgClass:'prod-img-carrot'},
+    {name:'Tres Leches Cake',emoji:'🍮',desc:'Classic sponge soaked in three milks, topped with lightly sweetened whipped cream. Irresistible.',tags:['Latin classic','Gluten option'],sizes:[{l:'8"',srv:'Serves 10–14',p:55},{l:'10"',srv:'Serves 18–24',p:75}],imgClass:'prod-img-default',badge:'New'},
+    {name:'Quinceañera Cake',emoji:'🎀',desc:'Elegant multi-tier showstopper for your quinceañera. Custom colours, flowers and personalised topper.',tags:['Special order','Contact us'],sizes:[{l:'2-tier',srv:'Serves 30–40',p:180},{l:'3-tier',srv:'Serves 60+',p:280}],imgClass:'prod-img-velvet'},
+    {name:'Custom Theme Cake',emoji:'✨',desc:'Tell us your vision — superhero, floral, sports, Disney and more. Fully custom design.',tags:['Fully custom','Contact for quote'],sizes:[{l:'8"',srv:'Serves 15–20',p:85},{l:'10"',srv:'Serves 25–30',p:110}],imgClass:'prod-img-default'},
+  ],
+  classics: [
+    {name:'Tres Leches',emoji:'🍮',desc:'Three-milk soaked sponge with whipped cream. The Latin dessert staple.',tags:['Traditional'],sizes:[{l:'Small tray',srv:'Serves 6–8',p:38},{l:'Large tray',srv:'Serves 12–16',p:65}],imgClass:'prod-img-default'},
+    {name:'Flan de Caramelo',emoji:'🍯',desc:'Silky smooth caramel custard baked in a water bath. Classic and comforting.',tags:['Traditional','GF'],sizes:[{l:'Individual',srv:'1 serving',p:7},{l:'Family (8 pc)',srv:'8 servings',p:48}],imgClass:'prod-img-default'},
+    {name:'Pionono Roll',emoji:'🌀',desc:'Swiss-roll style sponge with dulce de leche filling, rolled and dusted with powdered sugar.',tags:['Argentine','Sweet'],sizes:[{l:'Full roll',srv:'Serves 8–10',p:32}],imgClass:'prod-img-default'},
+    {name:'Brazo Gitano',emoji:'🎂',desc:'Light sponge roll filled with cream and topped with meringue. A Venezuelan classic.',tags:['Venezuelan'],sizes:[{l:'Full roll',srv:'Serves 8–10',p:35}],imgClass:'prod-img-velvet'},
+    {name:'Budín de Pan',emoji:'🍞',desc:'Latin bread pudding with raisins and vanilla sauce. Warm, comforting and delicious.',tags:['Comfort food','Warm'],sizes:[{l:'Family tray',srv:'Serves 8–10',p:28}],imgClass:'prod-img-carrot'},
+    {name:'Arroz con Leche',emoji:'🍚',desc:'Creamy rice pudding with cinnamon and condensed milk — served chilled.',tags:['Dairy','GF'],sizes:[{l:'Individual cup',srv:'1 serving',p:6},{l:'Family jar (6)',srv:'6 servings',p:30}],imgClass:'prod-img-default'},
+  ],
+  pastries: [
+    {name:'Cupcakes',emoji:'🧁',desc:'Assorted flavours with signature Tropical Taste frosting. Perfect for parties or gifting.',tags:['Customisable'],sizes:[{l:'6 pack',srv:'6 cupcakes',p:22},{l:'12 pack',srv:'12 cupcakes',p:36},{l:'24 pack',srv:'24 cupcakes',p:65}],imgClass:'prod-img-default',badge:'Bestseller'},
+    {name:'Churros',emoji:'🍩',desc:'Crispy golden churros dusted with cinnamon sugar. Served with chocolate dipping sauce.',tags:['Fried','Shareable'],sizes:[{l:'4 pack',srv:'4 churros',p:9},{l:'8 pack',srv:'8 churros',p:14}],imgClass:'prod-img-choco'},
+    {name:'Alfajores',emoji:'🍪',desc:'Melt-in-your-mouth shortbread cookies sandwiched with dulce de leche and rolled in coconut.',tags:['Argentine','Cookies'],sizes:[{l:'4 pack',srv:'4 pieces',p:12},{l:'8 pack',srv:'8 pieces',p:20}],imgClass:'prod-img-default'},
+    {name:'Empanadas (Sweet)',emoji:'🥐',desc:'Flaky pastry filled with cream cheese &amp; guava, apple cinnamon, or Nutella.',tags:['Sweet','Baked'],sizes:[{l:'3 pack',srv:'3 pieces',p:10},{l:'6 pack',srv:'6 pieces',p:18}],imgClass:'prod-img-default'},
+    {name:'Tequeños',emoji:'🧀',desc:'Venezuelan cheese-filled dough sticks — crispy outside, gooey inside. Party favourite.',tags:['Venezuelan','Shareable'],sizes:[{l:'8 pack',srv:'8 pieces',p:16},{l:'16 pack',srv:'16 pieces',p:28}],imgClass:'prod-img-velvet'},
+    {name:'Mantecadas',emoji:'🍰',desc:'Traditional Latin butter muffins — moist, rich and fragrant with vanilla.',tags:['Traditional','Muffins'],sizes:[{l:'6 pack',srv:'6 muffins',p:14},{l:'12 pack',srv:'12 muffins',p:24}],imgClass:'prod-img-carrot'},
+  ],
+  packages: [
+    {name:'Birthday Party Pack',emoji:'🎉',desc:'1 × 8" custom cake + 12 cupcakes + 8 churros. Everything for a perfect birthday.',tags:['Savings bundle','Customisable'],sizes:[{l:'Standard',srv:'Serves 20–25',p:105}],imgClass:'prod-img-default',badge:'Best Value'},
+    {name:'Office Celebration Pack',emoji:'🏢',desc:'2 trays of tres leches + 24 cupcakes + 16 alfajores. Great for workplace celebrations.',tags:['Office','Shareable'],sizes:[{l:'Standard',srv:'Serves 25–30',p:115}],imgClass:'prod-img-default'},
+    {name:'Quinceañera Package',emoji:'🎀',desc:'3-tier quinceañera cake + 50 cupcakes + 2 trays of tequeños. The complete fiesta package.',tags:['Special event','Contact required'],sizes:[{l:'Full package',srv:'Serves 60+',p:380}],imgClass:'prod-img-velvet',badge:'Premium'},
+    {name:'Sweet Table Package',emoji:'🍭',desc:'Assorted dessert table: tres leches, alfajores, empanadas, flan, mantecadas and cupcakes.',tags:['Assorted','Event'],sizes:[{l:'Small (30 pax)',srv:'30 servings',p:150},{l:'Large (60 pax)',srv:'60 servings',p:280}],imgClass:'prod-img-default'},
+  ]
+};
+
+/* ── RENDER MENU ── */
+function renderMenu(){
+  Object.entries(MENU).forEach(([cat, items])=>{
+    const container = document.getElementById(cat);
+    if(!container) return;
+    container.innerHTML = items.map((item,i)=>`
+      <div class="prod-card">
+        <div class="prod-img ${item.imgClass}">
+          ${item.badge?`<div class="prod-badge">${item.badge}</div>`:''}
+          ${item.emoji}
+        </div>
+        <div class="prod-info">
+          <div class="prod-nm">${item.name}</div>
+          <div class="prod-desc">${item.desc}</div>
+          <div class="prod-tags">${item.tags.map(t=>`<span class="prod-tag">${t}</span>`).join('')}</div>
+          <div class="prod-ft">
+            <span class="prod-pr">From $${item.sizes[0].p}</span>
+            <button class="atc-btn" onclick="openModal(${JSON.stringify(cat)},${i})">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  });
+}
+
+/* ── MODAL ── */
+let pendingItem = null;
+let pendingSize = null;
+
+function openModal(cat, idx){
+  pendingItem = {cat, idx};
+  const item = MENU[cat][idx];
+  pendingSize = item.sizes[0];
+  document.getElementById('mTitle').textContent = item.name;
+  document.getElementById('mPrice').textContent = `$${item.sizes[0].p}`;
+  const row = document.getElementById('sizeRow');
+  row.innerHTML = item.sizes.map((s,i)=>`
+    <div class="sz-opt${i===0?' sel':''}" onclick="selectSize(this,'${JSON.stringify(s).replace(/'/g,"\\'")}')">
+      <div class="sz-nm">${s.l}</div>
+      <div class="sz-srv">${s.srv}</div>
+      <div class="sz-pr">$${s.p}</div>
+    </div>
+  `).join('');
+  document.getElementById('modalOv').classList.add('on');
+}
+
+function selectSize(el, sizeJson){
+  pendingSize = JSON.parse(sizeJson);
+  document.querySelectorAll('.sz-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('mPrice').textContent = `$${pendingSize.p}`;
+}
+
+function closeModal(){
+  document.getElementById('modalOv').classList.remove('on');
+  pendingItem = null; pendingSize = null;
+}
+
+function confirmAdd(){
+  if(!pendingItem || !pendingSize) return;
+  const item = MENU[pendingItem.cat][pendingItem.idx];
+  const cart = JSON.parse(localStorage.getItem('tt_cart')||'[]');
+  cart.push({
+    id:Date.now(),type:'premade',
+    name:`${item.name} (${pendingSize.l})`,
+    emoji:item.emoji,
+    details:pendingSize.srv,
+    price:pendingSize.p,qty:1
+  });
+  localStorage.setItem('tt_cart',JSON.stringify(cart));
+  updateBadge();
+  showToast(item.emoji, `${item.name} added!`);
+  closeModal();
+}
+
+document.getElementById('modalOv').addEventListener('click',function(e){
+  if(e.target===this) closeModal();
+});
+
+/* ── TABS ── */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.menu-section').forEach(s=>s.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('tab-'+this.dataset.tab).classList.add('active');
+  });
+});
+
+/* ── BADGE ── */
+function updateBadge(){
+  const c=JSON.parse(localStorage.getItem('tt_cart')||'[]');
+  const n=c.reduce((s,i)=>s+(i.qty||1),0);
+  const b=document.getElementById('cartBadge');
+  if(b){b.textContent=n;b.classList.toggle('show',n>0);}
+}
+
+/* ── HAMBURGER ── */
+document.getElementById('hamburger').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+/* ── TOAST ── */
+let toastTimer;
+function showToast(ico,msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastIco').textContent=ico;
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ── HASH NAV (from anchor links) ── */
+function checkHash(){
+  const hash=location.hash.replace('#','');
+  if(['cakes','classics','pastries','packages'].includes(hash)){
+    document.querySelectorAll('.tab-btn').forEach(b=>{
+      if(b.dataset.tab===hash){
+        b.classList.add('active');b.click();
+      } else {
+        b.classList.remove('active');
+      }
+    });
+  }
+}
+
+renderMenu();
+updateBadge();
+checkHash();
+</script>
+</body>
+</html>

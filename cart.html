@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart & Checkout – Tropical Taste | Calgary, AB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@300;400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --coral:#FF6B6B;--pink:#FF2D8B;--purple:#7C3AED;
+  --teal:#0D9488;--golden:#F59E0B;
+  --f-elegant:'Playfair Display',serif;--f-mod:'Montserrat',sans-serif;--f-logo:'Pacifico',cursive;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;padding-top:72px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#08000f}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:.85rem 2.5rem;background:rgba(8,0,20,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.1)}
+.nav-logo{font-family:var(--f-logo);font-size:1.7rem;color:#fff;text-decoration:none;text-shadow:0 0 30px rgba(255,107,107,.7);white-space:nowrap}
+.nav-links{display:flex;gap:1.8rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,.75);text-decoration:none;font-size:.8rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;white-space:nowrap}
+.nav-links a:hover{color:var(--coral)}
+.nav-right{display:flex;align-items:center;gap:.8rem}
+.cart-link{position:relative;display:flex;align-items:center;gap:.5rem;background:none;border:1.5px solid rgba(255,255,255,.35);border-radius:50px;padding:.4rem 1rem;color:#fff;text-decoration:none;font-family:var(--f-mod);font-size:.8rem;font-weight:600;transition:all .2s}
+.cart-link.active-page{background:rgba(255,107,107,.2);border-color:var(--coral)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px;-webkit-tap-highlight-color:transparent}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* HERO BANNER */
+.hero-banner{background:linear-gradient(140deg,#FF6B6B 0%,#FF2D8B 50%,#7C3AED 100%);padding:3rem 2rem;text-align:center;position:relative;overflow:hidden}
+.hero-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.07),transparent 70%)}
+.banner-ttl{font-family:var(--f-elegant);font-size:clamp(2rem,5vw,3rem);font-weight:700;line-height:1.1;margin-bottom:.4rem}
+.banner-sub{font-size:.88rem;opacity:.8}
+
+/* MAIN LAYOUT */
+.wrap{max-width:1100px;margin:0 auto;padding:3rem 1.5rem 5rem}
+.cart-layout{display:grid;grid-template-columns:1fr 380px;gap:2.5rem;align-items:start}
+
+/* ── STEPS BAR ── */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:2.5rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:50px;padding:.4rem;overflow:hidden}
+.step{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.6rem .5rem;border-radius:50px;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.4);transition:all .3s;text-align:center}
+.step.active{background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff}
+.step.done{color:var(--teal)}
+.step-num{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0}
+.step.active .step-num{background:rgba(255,255,255,.3)}
+.step.done .step-num{background:var(--teal);color:#fff}
+
+/* ── CHECKOUT PANELS ── */
+.checkout-panel{display:none}
+.checkout-panel.active{display:block;animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CART ITEMS ── */
+.cart-empty-state{text-align:center;padding:4rem 2rem;color:rgba(255,255,255,.35)}
+.empty-ico{font-size:4rem;display:block;margin-bottom:1rem}
+.empty-ttl{font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+.empty-sub{font-size:.85rem;line-height:1.7;margin-bottom:1.5rem}
+.cart-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:1.1rem;margin-bottom:.9rem;display:flex;gap:1rem;align-items:flex-start}
+.ci-ico{font-size:2.2rem;flex-shrink:0;line-height:1}
+.ci-info{flex:1;min-width:0}
+.ci-nm{font-weight:700;font-size:.9rem;line-height:1.3}
+.ci-det{font-size:.74rem;color:rgba(255,255,255,.45);margin-top:.2rem;line-height:1.5}
+.ci-controls{display:flex;align-items:center;justify-content:space-between;margin-top:.8rem}
+.ci-qty{display:flex;align-items:center;gap:.6rem}
+.ci-qty-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;line-height:1;-webkit-tap-highlight-color:transparent;user-select:none}
+.ci-qty-btn:hover{background:rgba(255,255,255,.18)}
+.ci-qty-val{font-size:.88rem;font-weight:700;min-width:20px;text-align:center}
+.ci-price{font-weight:700;color:var(--golden);font-size:.95rem}
+.ci-rm{background:none;border:none;color:rgba(255,80,80,.55);cursor:pointer;font-size:.72rem;font-family:var(--f-mod);padding:.2rem .5rem;border-radius:6px;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.ci-rm:hover{background:rgba(255,80,80,.1);color:#ff6b6b}
+
+/* PANEL TITLE */
+.panel-ttl{font-family:var(--f-elegant);font-size:1.5rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.8rem;border-bottom:1px solid rgba(255,255,255,.08)}
+
+/* FORM */
+.f-field{margin-bottom:1rem}
+.f-lbl{display:block;font-size:.74rem;font-weight:600;color:rgba(255,255,255,.55);margin-bottom:.35rem}
+.f-inp,.f-sel,.f-textarea{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:11px;padding:.78rem 1rem;color:#fff;font-family:var(--f-mod);font-size:.88rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.f-inp::placeholder,.f-textarea::placeholder{color:rgba(255,255,255,.25)}
+.f-inp:focus,.f-sel:focus,.f-textarea:focus{border-color:var(--pink)}
+.f-sel option{background:#0c0018;color:#fff}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.f-textarea{min-height:80px;resize:vertical;line-height:1.5}
+
+/* DELIVERY TOGGLE */
+.delivery-toggle{display:flex;gap:.8rem;margin-bottom:1rem}
+.del-opt{flex:1;border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:.8rem;text-align:center;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;user-select:none}
+.del-opt:hover{border-color:rgba(255,255,255,.25)}
+.del-opt.sel{border-color:var(--golden);background:rgba(245,158,11,.1)}
+.del-opt-ico{font-size:1.4rem;display:block;margin-bottom:.3rem}
+.del-opt-nm{font-size:.82rem;font-weight:700}
+.del-opt-sub{font-size:.68rem;opacity:.45;margin-top:.15rem}
+
+/* PAYMENT */
+.pay-methods{display:flex;flex-direction:column;gap:.7rem}
+.pay-m{border:2px solid rgba(255,255,255,.1);border-radius:14px;padding:.95rem 1.1rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.9rem;-webkit-tap-highlight-color:transparent;user-select:none}
+.pay-m:hover{border-color:rgba(255,255,255,.22)}
+.pay-m.sel{border-color:var(--pink);background:rgba(255,45,139,.07)}
+.pay-radio{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.3);flex-shrink:0;position:relative;transition:all .2s}
+.pay-m.sel .pay-radio{border-color:var(--pink);background:var(--pink)}
+.pay-m.sel .pay-radio::after{content:'';position:absolute;inset:3px;background:#fff;border-radius:50%}
+.pay-ico{font-size:1.4rem}
+.pay-nm{font-weight:700;font-size:.88rem}
+.pay-sub{font-size:.7rem;opacity:.45}
+.pay-details{display:none;margin:.8rem 0 .4rem;padding:.8rem 1rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.7}
+.pay-details.on{display:block}
+.pay-details strong{color:var(--golden)}
+.pay-details a{color:var(--coral);text-decoration:none}
+.file-drop{border:2px dashed rgba(255,255,255,.18);border-radius:11px;padding:1.2rem;text-align:center;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.4);font-size:.8rem;margin-top:.7rem}
+.file-drop:hover{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.02)}
+.file-drop input{display:none}
+.file-drop-ico{font-size:1.6rem;display:block;margin-bottom:.3rem}
+.card-brand-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem}
+.card-brand{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.25rem .6rem;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.55)}
+
+/* STRIPE EMBEDDED CHECKOUT */
+.stripe-box{display:none}
+.stripe-box.on{display:block}
+#stripeCheckout{background:#fff;border-radius:16px;overflow:hidden;min-height:420px;padding:.5rem}
+.stripe-cancel{width:100%;margin-top:1rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:.85rem;border-radius:50px;font-family:var(--f-mod);font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.stripe-cancel:hover{background:rgba(255,255,255,.12)}
+
+/* NAV BUTTONS */
+.nav-btns{display:flex;gap:.8rem;margin-top:1.5rem}
+.btn-back{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:.85rem;border-radius:50px;font-family:var(--f-mod);font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.btn-back:hover{background:rgba(255,255,255,.12)}
+.btn-next{flex:2;background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:.85rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.85rem;cursor:pointer;transition:all .3s;-webkit-tap-highlight-color:transparent}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(255,45,139,.35)}
+.btn-next:active{transform:translateY(0)}
+
+/* ORDER SUMMARY SIDEBAR */
+.summary-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:1.5rem;position:sticky;top:90px}
+.summary-ttl{font-weight:700;font-size:1rem;margin-bottom:1.2rem;padding-bottom:.8rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.summary-items{margin-bottom:1rem}
+.sum-item{display:flex;justify-content:space-between;align-items:flex-start;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.82rem;gap:.5rem}
+.sum-item:last-child{border-bottom:none}
+.sum-item-nm{opacity:.8;line-height:1.4;flex:1}
+.sum-item-pr{font-weight:700;color:var(--golden);flex-shrink:0}
+.sum-subtotal,.sum-delivery,.sum-total{display:flex;justify-content:space-between;padding:.5rem 0;font-size:.85rem;color:rgba(255,255,255,.7)}
+.sum-total{border-top:1px solid rgba(255,255,255,.12);margin-top:.4rem;padding-top:.8rem;color:#fff;font-size:1.05rem;font-weight:700}
+.sum-total-val{color:var(--golden)}
+.sum-note{font-size:.72rem;opacity:.4;margin-top:.8rem;line-height:1.6}
+.promo-row{display:flex;gap:.6rem;margin-top:1rem}
+.promo-inp{flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:.6rem .9rem;color:#fff;font-family:var(--f-mod);font-size:.82rem;outline:none}
+.promo-inp::placeholder{color:rgba(255,255,255,.25)}
+.promo-inp:focus{border-color:var(--pink)}
+.promo-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.6rem .9rem;border-radius:10px;font-family:var(--f-mod);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.promo-btn:hover{background:rgba(255,255,255,.18)}
+
+/* SECURE BADGES */
+.secure-badges{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem;justify-content:center}
+.sec-badge{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.3rem .7rem;font-size:.65rem;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:.3rem}
+
+/* SUCCESS PAGE */
+.success-page{text-align:center;padding:3rem 1.5rem;max-width:600px;margin:0 auto}
+.success-ico{font-size:5rem;display:block;margin-bottom:1.2rem}
+.success-ttl{font-family:var(--f-elegant);font-size:2.2rem;font-weight:700;margin-bottom:.5rem}
+.success-sub{font-size:.9rem;opacity:.65;line-height:1.75;margin-bottom:1.5rem}
+.success-detail{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:1.3rem;margin-bottom:1.5rem;text-align:left;font-size:.85rem;line-height:1.8;color:rgba(255,255,255,.75)}
+.success-detail strong{color:var(--golden)}
+.success-btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.btn-pink{background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:.85rem 1.8rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.88rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:all .3s}
+.btn-pink:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(255,45,139,.35)}
+.btn-ghost{background:none;border:2px solid rgba(255,255,255,.35);color:#fff;padding:.82rem 1.8rem;border-radius:50px;font-family:var(--f-mod);font-weight:600;font-size:.88rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s}
+.btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+
+/* FOOTER */
+footer{background:linear-gradient(160deg,#0c0020 0%,#040408 100%);padding:3rem 2rem 2rem;text-align:center}
+.ft-logo{font-family:var(--f-logo);font-size:2rem;color:#fff;text-shadow:0 0 30px rgba(255,107,107,.5);margin-bottom:.3rem}
+.ft-tag{font-family:var(--f-elegant);font-style:italic;font-size:.85rem;opacity:.4;margin-bottom:1.8rem}
+.ft-links{display:flex;justify-content:center;gap:1.8rem;flex-wrap:wrap;margin-bottom:1.8rem}
+.ft-links a{color:rgba(255,255,255,.4);text-decoration:none;font-size:.78rem;transition:color .2s}
+.ft-links a:hover{color:#fff}
+.ft-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:1.3rem;font-size:.72rem;opacity:.3}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120px);background:#160028;border:1px solid rgba(255,255,255,.15);color:#fff;padding:.8rem 1.4rem;border-radius:50px;font-size:.85rem;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:.6rem;box-shadow:0 10px 40px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:900px){
+  .cart-layout{grid-template-columns:1fr;gap:2rem}
+  .summary-card{position:static;order:0}
+}
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(10,0,25,.98);padding:1.2rem 1.8rem;gap:1.2rem;border-top:1px solid rgba(255,255,255,.08);z-index:999}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+  .navbar{padding:.75rem 1.2rem}
+  .f-row{grid-template-columns:1fr}
+  .nav-btns{flex-direction:column}
+  .steps .step span:last-child{display:none}
+}
+@media(max-width:480px){.delivery-toggle{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" href="index.html">Tropical Taste</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="menu.html">Menu</a></li>
+    <li><a href="customize.html">Design a Cake</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="cart-link active-page" href="cart.html">🛒 Cart</a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <h1 class="banner-ttl">Your Cart</h1>
+  <p class="banner-sub">Review your order · Fill in your details · Choose how to pay</p>
+</div>
+
+<div class="wrap">
+
+  <!-- STEPS -->
+  <div class="steps" id="stepsBar">
+    <div class="step active" id="step1"><span class="step-num">1</span><span>Cart</span></div>
+    <div class="step" id="step2"><span class="step-num">2</span><span>Your Details</span></div>
+    <div class="step" id="step3"><span class="step-num">3</span><span>Payment</span></div>
+    <div class="step" id="step4"><span class="step-num">4</span><span>Confirm</span></div>
+  </div>
+
+  <div class="cart-layout" id="cartLayout">
+
+    <!-- LEFT: PANELS -->
+    <div>
+
+      <!-- PANEL 1: CART ITEMS -->
+      <div class="checkout-panel active" id="panel1">
+        <div class="panel-ttl">🛒 Items in Your Cart</div>
+        <div id="cartItemsContainer"></div>
+        <div id="emptyState" class="cart-empty-state" style="display:none">
+          <span class="empty-ico">🍰</span>
+          <div class="empty-ttl">Your cart is empty</div>
+          <p class="empty-sub">Head over to our menu or design your own custom cake to get started.</p>
+          <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap">
+            <a class="btn-pink" href="menu.html">Browse Menu</a>
+            <a style="background:none;border:2px solid rgba(255,255,255,.35);color:#fff;padding:.82rem 1.6rem;border-radius:50px;font-family:var(--f-mod);font-weight:600;font-size:.85rem;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem" href="customize.html">✨ Design a Cake</a>
+          </div>
+        </div>
+        <div class="nav-btns" id="cartContinueBtn" style="display:none">
+          <button class="btn-next" style="flex:1" onclick="goToStep(2)">Continue to Details →</button>
+        </div>
+      </div>
+
+      <!-- PANEL 2: GUEST DETAILS -->
+      <div class="checkout-panel" id="panel2">
+        <div class="panel-ttl">👤 Your Details</div>
+        <div class="f-field">
+          <label class="f-lbl" for="gName">Full Name *</label>
+          <input class="f-inp" id="gName" type="text" placeholder="Your full name" autocomplete="name">
+        </div>
+        <div class="f-row">
+          <div class="f-field">
+            <label class="f-lbl" for="gEmail">Email *</label>
+            <input class="f-inp" id="gEmail" type="email" placeholder="you@email.com" autocomplete="email">
+          </div>
+          <div class="f-field">
+            <label class="f-lbl" for="gPhone">Phone *</label>
+            <input class="f-inp" id="gPhone" type="tel" placeholder="(403) 000-0000" autocomplete="tel">
+          </div>
+        </div>
+
+        <div style="margin:1.3rem 0 .8rem;font-size:.74rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45)">Pickup or Delivery</div>
+        <div class="delivery-toggle">
+          <div class="del-opt sel" id="del-pickup" onclick="setDelivery('pickup')">
+            <span class="del-opt-ico">🏠</span>
+            <div class="del-opt-nm">Pickup</div>
+            <div class="del-opt-sub">Free · Bakery location</div>
+          </div>
+          <div class="del-opt" id="del-delivery" onclick="setDelivery('delivery')">
+            <span class="del-opt-ico">🚚</span>
+            <div class="del-opt-nm">Delivery</div>
+            <div class="del-opt-sub">+$10 · Calgary area</div>
+          </div>
+        </div>
+        <div id="addrField" style="display:none">
+          <div class="f-field">
+            <label class="f-lbl" for="gAddr">Delivery Address *</label>
+            <input class="f-inp" id="gAddr" type="text" placeholder="Street address, Calgary, AB" autocomplete="street-address">
+          </div>
+        </div>
+        <div class="f-row" style="margin-top:.5rem">
+          <div class="f-field">
+            <label class="f-lbl" for="gDate">Preferred Date *</label>
+            <input class="f-inp" id="gDate" type="date">
+          </div>
+          <div class="f-field">
+            <label class="f-lbl" for="gTime">Preferred Time</label>
+            <select class="f-sel" id="gTime">
+              <option value="">— Any time —</option>
+              <option>9:00 AM – 11:00 AM</option>
+              <option>11:00 AM – 1:00 PM</option>
+              <option>1:00 PM – 3:00 PM</option>
+              <option>3:00 PM – 5:00 PM</option>
+              <option>5:00 PM – 6:00 PM</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-field">
+          <label class="f-lbl" for="gNotes">Special Instructions</label>
+          <textarea class="f-textarea" id="gNotes" placeholder="Allergies, dietary restrictions, delivery instructions, candles, etc."></textarea>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="goToStep(1)">← Back to Cart</button>
+          <button class="btn-next" onclick="validateDetails()">Continue to Payment →</button>
+        </div>
+      </div>
+
+      <!-- PANEL 3: PAYMENT -->
+      <div class="checkout-panel" id="panel3">
+        <div class="panel-ttl">💳 Choose Payment Method</div>
+        <div class="pay-methods">
+
+          <!-- E-TRANSFER -->
+          <div class="pay-m sel" id="pm-et" onclick="selectPay('et')">
+            <div class="pay-radio"></div>
+            <div class="pay-ico">📲</div>
+            <div><div class="pay-nm">Interac e-Transfer</div><div class="pay-sub">Send to our email · upload proof</div></div>
+          </div>
+          <div class="pay-details on" id="pd-et">
+            Send your e-Transfer to: <strong>orders@tropicaltaste.ca</strong><br>
+            In the message field, enter: <strong>your name + phone number</strong><br>
+            Auto-deposit is enabled — <strong>no password needed</strong>.<br><br>
+            <div class="f-field" style="margin-bottom:.7rem">
+              <label class="f-lbl">Reference Code (optional)</label>
+              <input class="f-inp" id="etRef" type="text" placeholder="e.g. 12345678">
+            </div>
+            <label class="file-drop" for="etFile">
+              <input type="file" id="etFile" accept="image/*,.pdf" onchange="showFile(this,'etFileLbl')">
+              <span class="file-drop-ico">📎</span>
+              <div id="etFileLbl">Upload screenshot / confirmation (optional)</div>
+            </label>
+          </div>
+
+          <!-- STRIPE (CARD / GOOGLE PAY) -->
+          <div class="pay-m" id="pm-stripe" onclick="selectPay('stripe')">
+            <div class="pay-radio"></div>
+            <div class="pay-ico">💳</div>
+            <div><div class="pay-nm">Pay Online — Card / Google Pay</div><div class="pay-sub">Secure checkout powered by Stripe</div></div>
+          </div>
+          <div class="pay-details" id="pd-stripe">
+            After reviewing your order, a secure payment form by <strong>Stripe</strong> will open right here on this page.<br>
+            Your card details go directly to Stripe — they never touch our server.
+            <div class="card-brand-row">
+              <div class="card-brand">VISA</div>
+              <div class="card-brand">MC</div>
+              <div class="card-brand">AMEX</div>
+              <div class="card-brand">G PAY</div>
+            </div>
+          </div>
+
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="goToStep(2)">← Back</button>
+          <button class="btn-next" onclick="validatePayment()">Review Order →</button>
+        </div>
+      </div>
+
+      <!-- PANEL 4: CONFIRM -->
+      <div class="checkout-panel" id="panel4">
+        <div class="panel-ttl">✅ Review &amp; Place Order</div>
+        <div id="reviewContent" style="font-size:.88rem;line-height:1.8;color:rgba(255,255,255,.75);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.3rem;margin-bottom:1.5rem"></div>
+        <div id="policyNote" style="font-size:.78rem;opacity:.45;line-height:1.65;margin-bottom:1.2rem">
+          By placing your order you agree to our 48-hour advance order policy. Custom cakes cannot be refunded once baking has begun. For changes or cancellations contact us at <a href="tel:+14031234567" style="color:var(--coral)">(403) 123-4567</a>.
+        </div>
+        <div class="nav-btns" id="reviewBtns">
+          <button class="btn-back" onclick="goToStep(3)">← Back</button>
+          <button class="btn-next" id="placeOrderBtn" style="flex:2" onclick="placeOrder()">🎂 Place My Order</button>
+        </div>
+        <div class="stripe-box" id="stripeBox">
+          <div id="stripeCheckout"></div>
+          <button class="stripe-cancel" id="stripeCancelBtn">← Cancel payment and go back</button>
+        </div>
+      </div>
+
+      <!-- PANEL 5: SUCCESS -->
+      <div class="checkout-panel" id="panel5">
+        <div class="success-page">
+          <span class="success-ico">🎉</span>
+          <h2 class="success-ttl">Order Placed!</h2>
+          <p class="success-sub" id="successSub">We've received your order and will be in touch shortly to confirm everything.</p>
+          <div class="success-detail" id="successDetail"></div>
+          <div class="success-btns">
+            <a class="btn-pink" href="index.html">Back to Home</a>
+            <a class="btn-ghost" href="menu.html">Order More</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: ORDER SUMMARY -->
+    <div class="summary-card" id="summaryCard">
+      <div class="summary-ttl">Order Summary</div>
+      <div class="summary-items" id="summaryItems"></div>
+      <div class="sum-subtotal"><span>Subtotal</span><span id="sumSubtotal">$0.00</span></div>
+      <div class="sum-delivery"><span>Delivery</span><span id="sumDelivery">Free</span></div>
+      <div class="sum-total"><span>Total</span><span class="sum-total-val" id="sumTotal">$0.00</span></div>
+      <div class="promo-row">
+        <input class="promo-inp" type="text" placeholder="Promo code">
+        <button class="promo-btn">Apply</button>
+      </div>
+      <div class="sum-note">* 48 hr advance order required. Prices in CAD. Tax included.</div>
+      <div class="secure-badges">
+        <div class="sec-badge">🔒 Secure Checkout</div>
+        <div class="sec-badge">🇨🇦 Canadian Business</div>
+        <div class="sec-badge">✅ Fresh to Order</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-logo">Tropical Taste</div>
+  <p class="ft-tag">Authentic Latin Pastry — Calgary, Alberta</p>
+  <div class="ft-links">
+    <a href="index.html">Home</a><a href="menu.html">Menu</a>
+    <a href="customize.html">Design a Cake</a><a href="contact.html">Contact</a>
+  </div>
+  <div class="ft-bottom">&copy; 2025 Tropical Taste · Calgary, AB · All rights reserved 🌺</div>
+</footer>
+
+<div class="toast" id="toast"><span id="toastIco"></span><span id="toastMsg"></span></div>
+
+<script>
+/* ── STATE ── */
+let cart = JSON.parse(localStorage.getItem('tt_cart')||'[]');
+let currentStep = 1;
+let deliveryMode = 'pickup';
+let currentPayment = 'et';
+const DELIVERY_FEE = 10;
+
+/* ── RENDER CART ── */
+function renderCart(){
+  const container = document.getElementById('cartItemsContainer');
+  const empty = document.getElementById('emptyState');
+  const continueBtn = document.getElementById('cartContinueBtn');
+
+  if(cart.length === 0){
+    container.style.display = 'none';
+    empty.style.display = 'block';
+    continueBtn.style.display = 'none';
+    updateSummary();
+    return;
+  }
+  container.style.display = 'block';
+  empty.style.display = 'none';
+  continueBtn.style.display = 'flex';
+
+  container.innerHTML = cart.map((item,idx)=>`
+    <div class="cart-item">
+      <div class="ci-ico">${item.emoji}</div>
+      <div class="ci-info">
+        <div class="ci-nm">${item.name}</div>
+        <div class="ci-det">${item.details || ''}</div>
+        <div class="ci-controls">
+          <div class="ci-qty">
+            <button class="ci-qty-btn" onclick="changeQty(${idx},-1)">−</button>
+            <span class="ci-qty-val">${item.qty||1}</span>
+            <button class="ci-qty-btn" onclick="changeQty(${idx},1)">+</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:.8rem">
+            <span class="ci-price">$${((item.price||0)*(item.qty||1)).toFixed(2)}</span>
+            <button class="ci-rm" onclick="removeItem(${idx})">✕ Remove</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  updateSummary();
+}
+
+function changeQty(idx, delta){
+  cart[idx].qty = Math.max(1, (cart[idx].qty||1) + delta);
+  saveCart();
+  renderCart();
+}
+function removeItem(idx){
+  cart.splice(idx,1);
+  saveCart();
+  renderCart();
+  showToast('🗑️','Item removed from cart');
+}
+function saveCart(){
+  localStorage.setItem('tt_cart', JSON.stringify(cart));
+}
+
+/* ── SUMMARY ── */
+function updateSummary(){
+  const subtotal = cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  const delivery = deliveryMode === 'delivery' ? DELIVERY_FEE : 0;
+  const total = subtotal + delivery;
+
+  document.getElementById('sumSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+  document.getElementById('sumDelivery').textContent = delivery ? `$${delivery.toFixed(2)}` : 'Free';
+  document.getElementById('sumTotal').textContent = `$${total.toFixed(2)}`;
+
+  document.getElementById('summaryItems').innerHTML = cart.length
+    ? cart.map(i=>`<div class="sum-item"><span class="sum-item-nm">${i.emoji} ${i.name} ×${i.qty||1}</span><span class="sum-item-pr">$${((i.price||0)*(i.qty||1)).toFixed(2)}</span></div>`).join('')
+    : '<div style="font-size:.8rem;opacity:.4;text-align:center;padding:.5rem 0">No items yet</div>';
+}
+
+/* ── STEPS ── */
+function goToStep(n){
+  currentStep = n;
+  document.querySelectorAll('.checkout-panel').forEach((p,i)=>{
+    p.classList.toggle('active', i+1 === n);
+  });
+  document.querySelectorAll('.step').forEach((s,i)=>{
+    s.classList.toggle('active', i+1 === n);
+    s.classList.toggle('done', i+1 < n);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n===4) buildReview();
+}
+
+/* ── DELIVERY ── */
+function setDelivery(mode){
+  deliveryMode = mode;
+  document.getElementById('del-pickup').classList.toggle('sel', mode==='pickup');
+  document.getElementById('del-delivery').classList.toggle('sel', mode==='delivery');
+  document.getElementById('addrField').style.display = mode==='delivery'?'block':'none';
+  updateSummary();
+}
+
+/* ── PAYMENT ── */
+function selectPay(method){
+  currentPayment = method;
+  ['et','stripe'].forEach(m=>{
+    document.getElementById(`pm-${m}`).classList.toggle('sel', m===method);
+    document.getElementById(`pd-${m}`).classList.toggle('on',  m===method);
+  });
+}
+
+/* ── VALIDATE ── */
+function validateDetails(){
+  const name  = document.getElementById('gName').value.trim();
+  const email = document.getElementById('gEmail').value.trim();
+  const phone = document.getElementById('gPhone').value.trim();
+  const date  = document.getElementById('gDate').value;
+  if(!name||!email||!phone||!date){
+    showToast('⚠️','Please fill in all required fields.');
+    return;
+  }
+  if(deliveryMode==='delivery' && !document.getElementById('gAddr').value.trim()){
+    showToast('⚠️','Please enter your delivery address.');
+    return;
+  }
+  goToStep(3);
+}
+function validatePayment(){
+  goToStep(4);
+}
+
+/* ── REVIEW BUILD ── */
+function buildReview(){
+  const name  = document.getElementById('gName').value;
+  const email = document.getElementById('gEmail').value;
+  const phone = document.getElementById('gPhone').value;
+  const date  = document.getElementById('gDate').value;
+  const time  = document.getElementById('gTime').value||'Any time';
+  const notes = document.getElementById('gNotes').value;
+  const addr  = document.getElementById('gAddr')?.value||'—';
+  const subtotal = cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  const delivery = deliveryMode==='delivery'?DELIVERY_FEE:0;
+  const payNames = {et:'Interac e-Transfer',stripe:'Card / Google Pay (Stripe)'};
+
+  document.getElementById('reviewContent').innerHTML = `
+    <div style="display:grid;gap:.5rem">
+      <div>🛍️ <strong>${cart.length} item(s)</strong> — $${(subtotal+delivery).toFixed(2)} CAD</div>
+      <div>👤 <strong>${name}</strong> · ${email} · ${phone}</div>
+      <div>${deliveryMode==='pickup'?'🏠 Pickup (free)':'🚚 Delivery to: '+addr+' ($'+DELIVERY_FEE+')'}</div>
+      <div>📅 ${date?new Date(date+'T12:00').toLocaleDateString('en-CA',{weekday:'long',year:'numeric',month:'long',day:'numeric'}):''} · ${time}</div>
+      <div>💳 ${payNames[currentPayment]}</div>
+      ${notes?`<div>📝 Notes: ${notes}</div>`:''}
+      ${currentPayment==='et'?`<div style="color:var(--golden);font-size:.8rem">⚠️ Remember to send your e-Transfer to orders@tropicaltaste.ca</div>`:''}
+    </div>
+  `;
+}
+
+/* ── PLACE ORDER ── */
+function placeOrder(){
+  if(currentPayment === 'stripe'){
+    startStripeCheckout();
+    return;
+  }
+  const btn = document.getElementById('placeOrderBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing…';
+  setTimeout(()=>{
+    const name = document.getElementById('gName').value;
+    const email = document.getElementById('gEmail').value;
+    const date  = document.getElementById('gDate').value;
+    const subtotal = cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+    const delivery = deliveryMode==='delivery'?DELIVERY_FEE:0;
+
+    document.getElementById('successSub').textContent =
+      `Thank you, ${name.split(' ')[0]}! We'll contact you at ${email} to confirm your order details.`;
+
+    document.getElementById('successDetail').innerHTML = `
+      <strong>Order Reference:</strong> TT-${Date.now().toString().slice(-6)}<br>
+      <strong>Total Charged:</strong> $${(subtotal+delivery).toFixed(2)} CAD<br>
+      <strong>${deliveryMode==='pickup'?'Pickup':'Delivery'} Date:</strong> ${date?new Date(date+'T12:00').toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'}):''}<br>
+      ${currentPayment==='et'?`<br><strong>⚠️ Next step:</strong> Please send your e-Transfer to <strong>orders@tropicaltaste.ca</strong> to complete payment.`:''}
+      <br><br>Questions? Call us: <strong>(403) 123-4567</strong>
+    `;
+
+    cart = [];
+    localStorage.removeItem('tt_cart');
+    document.getElementById('stepsBar').style.display = 'none';
+    document.getElementById('summaryCard').style.display = 'none';
+    goToStep(5);
+    showToast('✅','Order placed successfully!');
+  }, 1200);
+}
+
+/* ── STRIPE EMBEDDED CHECKOUT ── */
+let stripeInstance = null;
+let embeddedCheckout = null;
+
+async function startStripeCheckout(){
+  const btn = document.getElementById('placeOrderBtn');
+  btn.disabled = true;
+  btn.textContent = 'Loading secure checkout…';
+  try{
+    if(!stripeInstance){
+      const cfgRes = await fetch('/api/stripe-config');
+      const cfg = await cfgRes.json();
+      if(!cfgRes.ok || !cfg.publishableKey) throw new Error('Online payment is not available right now.');
+      stripeInstance = Stripe(cfg.publishableKey);
+    }
+
+    const payload = {
+      items: cart.map(i=>({ name:i.name, price:i.price, qty:i.qty||1 })),
+      customer: {
+        name:  document.getElementById('gName').value.trim(),
+        email: document.getElementById('gEmail').value.trim(),
+        phone: document.getElementById('gPhone').value.trim(),
+      },
+      delivery: {
+        mode:    deliveryMode,
+        address: document.getElementById('gAddr').value.trim(),
+        date:    document.getElementById('gDate').value,
+        time:    document.getElementById('gTime').value,
+        notes:   document.getElementById('gNotes').value.trim(),
+      },
+    };
+
+    const res = await fetch('/api/create-checkout-session',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if(!res.ok || !data.clientSecret) throw new Error(data.error || 'Could not start checkout.');
+
+    document.getElementById('reviewContent').style.display = 'none';
+    document.getElementById('policyNote').style.display = 'none';
+    document.getElementById('reviewBtns').style.display = 'none';
+    document.getElementById('stripeBox').classList.add('on');
+
+    if(embeddedCheckout){ embeddedCheckout.destroy(); embeddedCheckout = null; }
+    embeddedCheckout = await stripeInstance.initEmbeddedCheckout({ clientSecret: data.clientSecret });
+    embeddedCheckout.mount('#stripeCheckout');
+  }catch(err){
+    showToast('⚠️', err.message);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '🎂 Place My Order';
+  }
+}
+
+function cancelStripeCheckout(){
+  if(embeddedCheckout){ embeddedCheckout.destroy(); embeddedCheckout = null; }
+  document.getElementById('stripeBox').classList.remove('on');
+  document.getElementById('reviewContent').style.display = 'block';
+  document.getElementById('policyNote').style.display = 'block';
+  document.getElementById('reviewBtns').style.display = 'flex';
+}
+document.getElementById('stripeCancelBtn').addEventListener('click', cancelStripeCheckout);
+
+async function handleStripeReturn(sessionId){
+  try{
+    const res = await fetch(`/api/session-status?session_id=${encodeURIComponent(sessionId)}`);
+    const data = await res.json();
+
+    if(res.ok && data.status === 'complete' && data.paymentStatus === 'paid'){
+      cart = [];
+      localStorage.removeItem('tt_cart');
+      document.getElementById('stepsBar').style.display = 'none';
+      document.getElementById('summaryCard').style.display = 'none';
+      document.getElementById('successSub').textContent =
+        `Payment confirmed! A receipt was sent to ${data.customerEmail}. We'll be in touch to confirm the details.`;
+      document.getElementById('successDetail').innerHTML = `
+        <strong>Order Number:</strong> ${data.orderNumber || '—'}<br>
+        <strong>Total Charged:</strong> $${(data.amountTotal/100).toFixed(2)} CAD<br>
+        <strong>Payment:</strong> Card / Google Pay via Stripe — ✅ Paid
+        <br><br>Questions? Call us: <strong>(403) 123-4567</strong>
+      `;
+      goToStep(5);
+      showToast('✅','Payment successful!');
+    }else{
+      showToast('⚠️','Payment was not completed. Your cart is still saved.');
+      renderCart();
+    }
+  }catch(err){
+    showToast('⚠️','Could not verify the payment. Please contact us.');
+    renderCart();
+  }
+  history.replaceState(null, '', 'cart.html');
+}
+
+function showFile(input, lblId){
+  const nm=input.files[0]?.name||'';
+  if(nm) document.getElementById(lblId).textContent='✓ '+nm;
+}
+
+/* ── HAMBURGER ── */
+document.getElementById('hamburger').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+/* ── TOAST ── */
+let toastTimer;
+function showToast(ico,msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastIco').textContent=ico;
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* ── INIT ── */
+const minDate=new Date();
+minDate.setDate(minDate.getDate()+2);
+document.getElementById('gDate').min=minDate.toISOString().split('T')[0];
+
+const returnSessionId = new URLSearchParams(location.search).get('session_id');
+if(returnSessionId){
+  handleStripeReturn(returnSessionId);
+}else{
+  renderCart();
+}
+</script>
+</body>
+</html>

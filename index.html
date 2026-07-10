@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tropical Taste – Latin Pastry | Calgary, AB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;700&family=Montserrat:wght@300;400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --coral:#FF6B6B;--pink:#FF2D8B;--purple:#7C3AED;--dpurple:#4C1D95;
+  --teal:#0D9488;--golden:#F59E0B;--choco:#3D1A07;
+  --f-elegant:'Playfair Display',serif;--f-play:'Dancing Script',cursive;
+  --f-mod:'Montserrat',sans-serif;--f-logo:'Pacifico',cursive;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#08000f}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+
+/* ── NAVBAR ── */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 2.5rem;background:rgba(0,0,0,.25);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08);transition:all .3s}
+.navbar.scrolled{background:rgba(8,0,20,.94);padding:.75rem 2.5rem}
+.nav-logo{font-family:var(--f-logo);font-size:1.8rem;color:#fff;text-decoration:none;text-shadow:0 0 30px rgba(255,107,107,.7);white-space:nowrap}
+.nav-links{display:flex;gap:1.8rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,.8);text-decoration:none;font-size:.82rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{color:var(--coral)}
+.nav-right{display:flex;align-items:center;gap:.8rem}
+.cart-link{position:relative;display:flex;align-items:center;gap:.5rem;background:none;border:1.5px solid rgba(255,255,255,.4);border-radius:50px;padding:.45rem 1.1rem;color:#fff;text-decoration:none;font-family:var(--f-mod);font-size:.82rem;font-weight:600;transition:all .2s;white-space:nowrap}
+.cart-link:hover{background:rgba(255,255,255,.12);border-color:#fff}
+.cart-badge{position:absolute;top:-8px;right:-8px;background:var(--coral);color:#fff;border-radius:50%;width:20px;height:20px;font-size:.65rem;font-weight:700;display:none;align-items:center;justify-content:center}
+.cart-badge.show{display:flex}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px;-webkit-tap-highlight-color:transparent}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(140deg,#FF6B6B 0%,#FF2D8B 35%,#7C3AED 70%,#2D0B6E 100%)}
+.hero-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.p{position:absolute;font-size:2rem;opacity:.2;animation:pfloat var(--dur,6s) ease-in-out infinite;animation-delay:var(--delay,0s)}
+@keyframes pfloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-25px) rotate(15deg)}}
+.hero-inner{text-align:center;z-index:1;padding:2rem;max-width:800px}
+.hero-badge{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;padding:.35rem 1.2rem;border-radius:50px;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.5rem;animation:fadeUp .6s ease both}
+.hero-title{font-family:var(--f-logo);font-size:clamp(3.5rem,11vw,9rem);color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.3),0 0 80px rgba(255,255,255,.15);display:inline-block;line-height:1.05;animation:fadeUp .6s .12s ease both;cursor:default}
+.hero-sub{font-size:clamp(.9rem,2.2vw,1.25rem);color:rgba(255,255,255,.88);margin-top:.8rem;font-weight:300;letter-spacing:.04em;animation:fadeUp .6s .24s ease both}
+.hero-tag{font-family:var(--f-elegant);font-style:italic;font-size:clamp(.82rem,1.8vw,1rem);color:rgba(255,255,255,.6);margin-top:.4rem;animation:fadeUp .6s .36s ease both}
+.hero-cta{margin-top:2.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;animation:fadeUp .6s .48s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.btn-white{background:#fff;color:var(--pink);border:none;padding:.85rem 2rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.88rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;letter-spacing:.04em;transition:all .3s}
+.btn-white:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,.25)}
+.btn-outline{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.6);padding:.85rem 2rem;border-radius:50px;font-family:var(--f-mod);font-weight:600;font-size:.88rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;letter-spacing:.04em;transition:all .3s}
+.btn-outline:hover{background:rgba(255,255,255,.12);border-color:#fff;transform:translateY(-3px)}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;color:rgba(255,255,255,.4);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;animation:fadeUp .6s 1s ease both}
+.scroll-arr{width:22px;height:22px;border-right:2px solid rgba(255,255,255,.35);border-bottom:2px solid rgba(255,255,255,.35);transform:rotate(45deg);animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(6px)}}
+
+/* ── FEATURES ── */
+.features{background:linear-gradient(to right,#5B21B6,#3730A3);padding:1.6rem 2rem;display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap}
+.feat{display:flex;align-items:center;gap:.8rem;color:#fff}
+.feat-ico{font-size:1.6rem}
+.feat-txt strong{display:block;font-size:.88rem;font-weight:700}
+.feat-txt span{font-size:.72rem;opacity:.65}
+
+/* ── SECTION COMMON ── */
+section{padding:5rem 2rem}
+.sec-lbl{font-size:.72rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;opacity:.6;margin-bottom:.4rem}
+.sec-ttl{font-family:var(--f-elegant);font-size:clamp(1.9rem,4.5vw,3rem);line-height:1.15;margin-bottom:.7rem}
+.divider{width:50px;height:4px;background:linear-gradient(to right,var(--coral),var(--pink));border-radius:2px;margin:.7rem 0 1.4rem}
+.sec-sub{font-size:.92rem;opacity:.7;max-width:560px;line-height:1.75}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.on{opacity:1;transform:translateY(0)}
+
+/* ── FEATURED ITEMS ── */
+.featured-sec{background:linear-gradient(160deg,#1E0B45 0%,#100325 100%)}
+.featured-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.4rem;max-width:1200px;margin:2.5rem auto 0}
+.prod-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden;transition:transform .3s,border-color .3s;cursor:default}
+.prod-card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.22)}
+.prod-img{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(124,58,237,.12))}
+.prod-info{padding:1.1rem 1.3rem}
+.prod-nm{font-weight:700;font-size:.95rem;margin-bottom:.2rem}
+.prod-desc{font-size:.78rem;opacity:.55;line-height:1.5;margin-bottom:.9rem}
+.prod-ft{display:flex;align-items:center;justify-content:space-between}
+.prod-pr{font-weight:700;color:var(--golden);font-size:1.05rem}
+.atc-sm{background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:.45rem 1rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.78rem;cursor:pointer;transition:all .25s;-webkit-tap-highlight-color:transparent}
+.atc-sm:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(255,45,139,.35)}
+
+/* ── CUSTOMIZER PROMO ── */
+.promo-sec{background:linear-gradient(135deg,#100325 0%,#0a1628 100%);display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;max-width:1200px;margin:0 auto;padding:5rem 2rem}
+.promo-txt .sec-lbl{color:var(--pink)}
+.promo-visual{background:linear-gradient(135deg,rgba(255,107,107,.15),rgba(124,58,237,.15));border:1px solid rgba(255,255,255,.1);border-radius:24px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:7rem;position:relative;overflow:hidden}
+.promo-visual::before{content:'';position:absolute;inset:-20%;background:radial-gradient(circle at 50% 50%,rgba(255,45,139,.18),transparent 70%);animation:pulse 4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.1);opacity:1}}
+.promo-features{display:flex;flex-direction:column;gap:.7rem;margin:1.5rem 0 2rem}
+.pf-item{display:flex;align-items:center;gap:.8rem;font-size:.88rem;opacity:.8}
+.pf-ico{font-size:1.2rem}
+.btn-pink{background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:.9rem 2.2rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.6rem;letter-spacing:.04em;transition:all .3s}
+.btn-pink:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(255,45,139,.4)}
+
+/* ── GALLERY ── */
+.gal-sec{background:linear-gradient(160deg,#04141a 0%,#041a10 100%)}
+.gal-sec .sec-lbl{color:var(--teal)}
+.gal-hdr{max-width:1200px;margin:0 auto 2.5rem}
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.4rem;max-width:1200px;margin:0 auto}
+.gal-card{border-radius:20px;overflow:hidden;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:transform .3s}
+.gal-card:hover{transform:translateY(-5px)}
+.gal-img{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(124,58,237,.12))}
+.gal-info{padding:.9rem 1.1rem}
+.gal-nm{font-weight:700;font-size:.9rem}
+.gal-desc{font-size:.75rem;opacity:.5;margin-top:.2rem}
+
+/* ── REVIEWS ── */
+.rev-sec{background:linear-gradient(160deg,#041a10 0%,#080010 100%)}
+.rev-sec .sec-lbl{color:var(--golden)}
+.rev-hdr{max-width:1100px;margin:0 auto 2.5rem}
+.rev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.4rem;max-width:1100px;margin:0 auto}
+.rev-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:1.4rem}
+.rev-top{display:flex;align-items:center;gap:.9rem;margin-bottom:.9rem}
+.rev-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex-shrink:0}
+.rev-nm{font-weight:700;font-size:.88rem}
+.rev-loc{font-size:.7rem;opacity:.5}
+.rev-stars{color:var(--golden);font-size:.82rem;margin-left:auto;align-self:flex-start}
+.rev-txt{font-size:.85rem;line-height:1.65;opacity:.78;font-style:italic}
+
+/* ── ACCORDION ── */
+.acc-sec{background:linear-gradient(160deg,#080010 0%,#040d1a 100%)}
+.acc-sec .sec-lbl{color:var(--golden)}
+.acc-wrap{max-width:860px;margin:0 auto 3rem}
+.accordion{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:.9rem}
+.acc-item{border:1px solid rgba(255,255,255,.1);border-radius:18px;overflow:hidden;background:rgba(255,255,255,.025);transition:border-color .3s}
+.acc-item.open{border-color:rgba(255,255,255,.2)}
+.acc-hdr{width:100%;display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.6rem;background:none;border:none;color:#fff;cursor:pointer;text-align:left;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.acc-hdr:hover{background:rgba(255,255,255,.04)}
+.acc-hdr-l{display:flex;align-items:center;gap:.9rem}
+.acc-ico{font-size:1.3rem;width:40px;height:40px;background:rgba(255,255,255,.07);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.acc-hdr-txt strong{display:block;font-size:.95rem;font-weight:700}
+.acc-hdr-txt span{font-size:.72rem;opacity:.42}
+.acc-arr{width:18px;height:18px;border-right:2px solid rgba(255,255,255,.4);border-bottom:2px solid rgba(255,255,255,.4);transform:rotate(45deg);transition:transform .3s ease;margin-top:-5px;flex-shrink:0;pointer-events:none}
+.acc-item.open .acc-arr{transform:rotate(-135deg);margin-top:3px}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.acc-item.open .acc-body{max-height:1400px}
+.acc-cnt{padding:.2rem 1.6rem 1.6rem;color:rgba(255,255,255,.8)}
+
+/* Contact in accordion */
+.c-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.9rem}
+.c-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:center}
+.c-card-ico{font-size:1.7rem;margin-bottom:.4rem}
+.c-card-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;opacity:.45}
+.c-card-val{font-weight:700;font-size:.85rem;margin-top:.2rem}
+.c-card a{color:var(--coral);text-decoration:none}
+/* Reviews in accordion */
+.acc-rev{display:flex;flex-direction:column;gap:.8rem;margin-top:.5rem}
+.acc-rev-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem}
+.acc-rev-top{display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem}
+.acc-rev-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+.acc-rev-nm{font-weight:700;font-size:.82rem}
+.acc-rev-loc{font-size:.68rem;opacity:.45}
+.acc-rev-stars{color:var(--golden);font-size:.78rem;margin-left:auto}
+.acc-rev-txt{font-size:.82rem;line-height:1.6;opacity:.75;font-style:italic}
+/* Quick links in accordion */
+.acc-quick-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.8rem}
+.acc-link-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:center;text-decoration:none;color:#fff;transition:all .2s;display:block}
+.acc-link-card:hover{background:rgba(255,255,255,.1);border-color:var(--coral);transform:translateY(-2px)}
+.acc-link-ico{font-size:2rem;display:block;margin-bottom:.4rem}
+.acc-link-nm{font-weight:700;font-size:.82rem}
+.acc-link-sub{font-size:.7rem;opacity:.5;margin-top:.15rem}
+
+/* ── FOOTER ── */
+footer{background:linear-gradient(160deg,#0c0020 0%,#040408 100%);padding:3.5rem 2rem 2rem;text-align:center}
+.ft-logo{font-family:var(--f-logo);font-size:2.2rem;color:#fff;text-shadow:0 0 30px rgba(255,107,107,.5);margin-bottom:.4rem}
+.ft-tag{font-family:var(--f-elegant);font-style:italic;font-size:.88rem;opacity:.4;margin-bottom:2rem}
+.ft-links{display:flex;justify-content:center;gap:1.8rem;flex-wrap:wrap;margin-bottom:2rem}
+.ft-links a{color:rgba(255,255,255,.45);text-decoration:none;font-size:.78rem;transition:color .2s}
+.ft-links a:hover{color:#fff}
+.ft-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:1.4rem;font-size:.73rem;opacity:.3}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120px);background:#160028;border:1px solid rgba(255,255,255,.15);color:#fff;padding:.8rem 1.5rem;border-radius:50px;font-size:.85rem;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:.6rem;box-shadow:0 10px 40px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .promo-sec{grid-template-columns:1fr;gap:2rem;padding:4rem 1.5rem}
+  .promo-visual{max-width:280px;margin:0 auto}
+}
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(10,0,25,.98);padding:1.2rem 1.8rem;gap:1.3rem;border-top:1px solid rgba(255,255,255,.08);z-index:999}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+  section{padding:4rem 1.5rem}
+  .features{gap:1.3rem}
+}
+@media(max-width:480px){
+  .hero-cta{flex-direction:column;align-items:center}
+  .navbar{padding:.9rem 1.2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" href="index.html">Tropical Taste</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="menu.html">Menu</a></li>
+    <li><a href="customize.html">Design a Cake</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="cart-link" href="cart.html">
+      🛒 Cart<span class="cart-badge" id="cartBadge"></span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">✦ Calgary's Latin Pastry Gem ✦</div>
+    <div class="hero-title">Tropical Taste</div>
+    <p class="hero-sub">Authentic Latin Pastries — Baked with Love in Calgary, AB</p>
+    <p class="hero-tag">"Every cake tells a story — let us tell yours"</p>
+    <div class="hero-cta">
+      <a class="btn-white" href="customize.html">🎂 Design Your Cake</a>
+      <a class="btn-outline" href="menu.html">📋 See Full Menu</a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll to explore</span>
+    <div class="scroll-arr"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<div class="features">
+  <div class="feat"><div class="feat-ico">🌺</div><div class="feat-txt"><strong>Latin Recipes</strong><span>Traditional &amp; handcrafted</span></div></div>
+  <div class="feat"><div class="feat-ico">🚚</div><div class="feat-txt"><strong>Calgary Delivery</strong><span>City-wide &amp; pickup</span></div></div>
+  <div class="feat"><div class="feat-ico">✨</div><div class="feat-txt"><strong>Custom Cakes</strong><span>Your vision, our art</span></div></div>
+  <div class="feat"><div class="feat-ico">🎉</div><div class="feat-txt"><strong>All Occasions</strong><span>Birthdays, quinces &amp; more</span></div></div>
+</div>
+
+<!-- FEATURED ITEMS -->
+<section class="featured-sec" id="featured">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="reveal">
+      <div class="sec-lbl" style="color:var(--coral)">✦ Customer Favourites ✦</div>
+      <h2 class="sec-ttl">Order Something Special</h2>
+      <div class="divider"></div>
+      <p class="sec-sub">Hand-picked bestsellers from our kitchen — ready to add to your cart in one click.</p>
+    </div>
+    <div class="featured-grid">
+      <div class="prod-card reveal">
+        <div class="prod-img">🎂</div>
+        <div class="prod-info">
+          <div class="prod-nm">Custom Birthday Cake</div>
+          <div class="prod-desc">8" round, personalized design with your choice of flavour and message.</div>
+          <div class="prod-ft">
+            <span class="prod-pr">$65</span>
+            <button class="atc-sm" onclick="quickAdd('Custom Birthday Cake','🎂',65)">+ Add to Cart</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card reveal">
+        <div class="prod-img">🍮</div>
+        <div class="prod-info">
+          <div class="prod-nm">Tres Leches Cake</div>
+          <div class="prod-desc">Classic Latin sponge soaked in three milks, topped with whipped cream.</div>
+          <div class="prod-ft">
+            <span class="prod-pr">$38</span>
+            <button class="atc-sm" onclick="quickAdd('Tres Leches Cake','🍮',38)">+ Add to Cart</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card reveal">
+        <div class="prod-img">🧁</div>
+        <div class="prod-info">
+          <div class="prod-nm">Cupcakes (12 pack)</div>
+          <div class="prod-desc">Assorted flavours with signature Tropical Taste frosting. Perfect for parties.</div>
+          <div class="prod-ft">
+            <span class="prod-pr">$36</span>
+            <button class="atc-sm" onclick="quickAdd('Cupcakes (12 pack)','🧁',36)">+ Add to Cart</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card reveal">
+        <div class="prod-img">🍩</div>
+        <div class="prod-info">
+          <div class="prod-nm">Churros (8 pack)</div>
+          <div class="prod-desc">Crispy golden churros dusted with cinnamon sugar, served with chocolate dip.</div>
+          <div class="prod-ft">
+            <span class="prod-pr">$14</span>
+            <button class="atc-sm" onclick="quickAdd('Churros (8 pack)','🍩',14)">+ Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:2rem">
+      <a class="btn-outline" href="menu.html" style="border-color:rgba(255,255,255,.4)">View Full Menu →</a>
+    </div>
+  </div>
+</section>
+
+<!-- CUSTOMIZER PROMO -->
+<div style="background:linear-gradient(135deg,#100325 0%,#0a1628 100%)">
+  <div class="promo-sec reveal">
+    <div class="promo-txt">
+      <div class="sec-lbl" style="color:var(--pink)">✦ AI-Powered Preview ✦</div>
+      <h2 class="sec-ttl">Design Your Dream Cake</h2>
+      <div class="divider"></div>
+      <p class="sec-sub">Use our interactive cake designer — pick your flavour, font, and personal message. See a live canvas preview before you order.</p>
+      <div class="promo-features">
+        <div class="pf-item"><span class="pf-ico">🎨</span> 3 designer flavour themes</div>
+        <div class="pf-item"><span class="pf-ico">✍️</span> 3 font styles to personalise</div>
+        <div class="pf-item"><span class="pf-ico">📐</span> 3 sizes · 6" · 8" · 10"</div>
+        <div class="pf-item"><span class="pf-ico">🛒</span> Add straight to cart</div>
+      </div>
+      <a class="btn-pink" href="customize.html">✨ Open Cake Designer</a>
+    </div>
+    <div class="promo-visual reveal">🎂</div>
+  </div>
+</div>
+
+<!-- GALLERY -->
+<section class="gal-sec" id="gallery">
+  <div class="gal-hdr reveal">
+    <div class="sec-lbl">✦ Our Work ✦</div>
+    <h2 class="sec-ttl">Crafted with Passion</h2>
+    <div class="divider" style="background:linear-gradient(to right,var(--teal),var(--golden))"></div>
+    <p class="sec-sub">Every order is a work of art. A glimpse at some of our favourite creations for Calgary families.</p>
+  </div>
+  <div class="gal-grid">
+    <div class="gal-card reveal"><div class="gal-img">🎂</div><div class="gal-info"><div class="gal-nm">Quinceañera Dream</div><div class="gal-desc">3-tier pink &amp; gold · serves 60</div></div></div>
+    <div class="gal-card reveal"><div class="gal-img">🍓</div><div class="gal-info"><div class="gal-nm">Strawberry Heaven</div><div class="gal-desc">Fresh strawberries &amp; chocolate drips</div></div></div>
+    <div class="gal-card reveal"><div class="gal-img">🌺</div><div class="gal-info"><div class="gal-nm">Floral Fantasy</div><div class="gal-desc">Buttercream flowers · spring theme</div></div></div>
+    <div class="gal-card reveal"><div class="gal-img">🧁</div><div class="gal-info"><div class="gal-nm">Cupcake Tower</div><div class="gal-desc">36 custom cupcakes · tropical theme</div></div></div>
+    <div class="gal-card reveal"><div class="gal-img">🍰</div><div class="gal-info"><div class="gal-nm">Red Velvet Classic</div><div class="gal-desc">Cream cheese frosting · gold leaf</div></div></div>
+    <div class="gal-card reveal"><div class="gal-img">🥕</div><div class="gal-info"><div class="gal-nm">Carrot &amp; Walnut</div><div class="gal-desc">Spiced carrot · cream cheese rosettes</div></div></div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="rev-sec">
+  <div class="rev-hdr reveal">
+    <div class="sec-lbl">✦ What Customers Say ✦</div>
+    <h2 class="sec-ttl">Real Smiles, Real Stories</h2>
+    <div class="divider" style="background:linear-gradient(to right,var(--golden),var(--coral))"></div>
+  </div>
+  <div class="rev-grid">
+    <div class="rev-card reveal">
+      <div class="rev-top">
+        <div class="rev-av" style="background:linear-gradient(135deg,var(--coral),var(--pink))">M</div>
+        <div><div class="rev-nm">María G.</div><div class="rev-loc">NW Calgary</div></div>
+        <div class="rev-stars">★★★★★</div>
+      </div>
+      <div class="rev-txt">"The Red Velvet cake for my daughter's quinceañera was absolutely stunning. The whole family couldn't stop talking about how beautiful and delicious it was!"</div>
+    </div>
+    <div class="rev-card reveal">
+      <div class="rev-top">
+        <div class="rev-av" style="background:linear-gradient(135deg,var(--teal),var(--purple))">J</div>
+        <div><div class="rev-nm">James K.</div><div class="rev-loc">SE Calgary</div></div>
+        <div class="rev-stars">★★★★★</div>
+      </div>
+      <div class="rev-txt">"Ordered the strawberry &amp; chocolate cake for my wife's birthday. The custom message was perfectly written and the flavour was out of this world!"</div>
+    </div>
+    <div class="rev-card reveal">
+      <div class="rev-top">
+        <div class="rev-av" style="background:linear-gradient(135deg,var(--golden),var(--coral))">L</div>
+        <div><div class="rev-nm">Lucia P.</div><div class="rev-loc">SW Calgary</div></div>
+        <div class="rev-stars">★★★★★</div>
+      </div>
+      <div class="rev-txt">"The tres leches was exactly like my abuela used to make. So authentic, so moist. Tropical Taste is a hidden gem in Calgary — highly recommend!"</div>
+    </div>
+  </div>
+</section>
+
+<!-- ACCORDION -->
+<section class="acc-sec" id="quick-links">
+  <div class="acc-wrap reveal">
+    <div class="sec-lbl">✦ Quick Access ✦</div>
+    <h2 class="sec-ttl">Everything in One Place</h2>
+    <div class="divider" style="background:linear-gradient(to right,var(--golden),var(--coral))"></div>
+  </div>
+  <div class="accordion" id="mainAccordion">
+
+    <div class="acc-item" id="acc-contact">
+      <button class="acc-hdr" type="button">
+        <div class="acc-hdr-l">
+          <div class="acc-ico">📍</div>
+          <div class="acc-hdr-txt">
+            <strong>Contact &amp; Hours</strong>
+            <span>Find us · call us · message us</span>
+          </div>
+        </div>
+        <div class="acc-arr"></div>
+      </button>
+      <div class="acc-body">
+        <div class="acc-cnt">
+          <div class="c-grid">
+            <div class="c-card"><div class="c-card-ico">📍</div><div class="c-card-lbl">Address</div><div class="c-card-val">Calgary, Alberta, Canada</div></div>
+            <div class="c-card"><div class="c-card-ico">📞</div><div class="c-card-lbl">Phone</div><div class="c-card-val"><a href="tel:+14031234567">(403) 123-4567</a></div></div>
+            <div class="c-card"><div class="c-card-ico">📧</div><div class="c-card-lbl">Email</div><div class="c-card-val"><a href="mailto:orders@tropicaltaste.ca">orders@tropicaltaste.ca</a></div></div>
+            <div class="c-card"><div class="c-card-ico">⏰</div><div class="c-card-lbl">Hours</div><div class="c-card-val">Tue–Sun · 9am–6pm</div></div>
+          </div>
+          <div style="margin-top:1rem">
+            <a class="btn-pink" href="contact.html" style="font-size:.82rem;padding:.7rem 1.5rem">See full contact page →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item" id="acc-menu">
+      <button class="acc-hdr" type="button">
+        <div class="acc-hdr-l">
+          <div class="acc-ico">📋</div>
+          <div class="acc-hdr-txt">
+            <strong>Our Menu</strong>
+            <span>Cakes, pastries &amp; Latin classics</span>
+          </div>
+        </div>
+        <div class="acc-arr"></div>
+      </button>
+      <div class="acc-body">
+        <div class="acc-cnt">
+          <div class="acc-quick-links">
+            <a class="acc-link-card" href="menu.html#cakes"><span class="acc-link-ico">🎂</span><div class="acc-link-nm">Custom Cakes</div><div class="acc-link-sub">From $45</div></a>
+            <a class="acc-link-card" href="menu.html#classics"><span class="acc-link-ico">🍮</span><div class="acc-link-nm">Latin Classics</div><div class="acc-link-sub">From $25</div></a>
+            <a class="acc-link-card" href="menu.html#pastries"><span class="acc-link-ico">🧁</span><div class="acc-link-nm">Pastries</div><div class="acc-link-sub">From $14</div></a>
+            <a class="acc-link-card" href="menu.html#packages"><span class="acc-link-ico">🎉</span><div class="acc-link-nm">Party Packs</div><div class="acc-link-sub">Best value</div></a>
+          </div>
+          <div style="margin-top:1.2rem"><a class="btn-pink" href="menu.html" style="font-size:.82rem;padding:.7rem 1.5rem">Browse full menu →</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item" id="acc-customize">
+      <button class="acc-hdr" type="button">
+        <div class="acc-hdr-l">
+          <div class="acc-ico">🎨</div>
+          <div class="acc-hdr-txt">
+            <strong>Design Your Cake</strong>
+            <span>AI-powered cake personaliser</span>
+          </div>
+        </div>
+        <div class="acc-arr"></div>
+      </button>
+      <div class="acc-body">
+        <div class="acc-cnt" style="text-align:center;padding-bottom:1.5rem">
+          <p style="font-size:.88rem;opacity:.65;line-height:1.7;max-width:480px;margin:0 auto 1.3rem">Pick your flavour, choose your font style, type your message — and watch your personalised birthday cake come to life on our live preview canvas.</p>
+          <a class="btn-pink" href="customize.html">✨ Open Cake Designer</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item" id="acc-reviews">
+      <button class="acc-hdr" type="button">
+        <div class="acc-hdr-l">
+          <div class="acc-ico">🌟</div>
+          <div class="acc-hdr-txt">
+            <strong>Previous Work &amp; Reviews</strong>
+            <span>Real cakes · real smiles</span>
+          </div>
+        </div>
+        <div class="acc-arr"></div>
+      </button>
+      <div class="acc-body">
+        <div class="acc-cnt">
+          <div class="acc-rev">
+            <div class="acc-rev-card">
+              <div class="acc-rev-top">
+                <div class="acc-rev-av" style="background:linear-gradient(135deg,var(--coral),var(--pink))">M</div>
+                <div><div class="acc-rev-nm">María G. — NW Calgary</div></div>
+                <div class="acc-rev-stars">★★★★★</div>
+              </div>
+              <div class="acc-rev-txt">"Absolutely stunning cake for my daughter's quinceañera. The whole family couldn't stop talking about it!"</div>
+            </div>
+            <div class="acc-rev-card">
+              <div class="acc-rev-top">
+                <div class="acc-rev-av" style="background:linear-gradient(135deg,var(--teal),var(--purple))">J</div>
+                <div><div class="acc-rev-nm">James K. — SE Calgary</div></div>
+                <div class="acc-rev-stars">★★★★★</div>
+              </div>
+              <div class="acc-rev-txt">"The custom message was perfectly written on the cake and the flavour was out of this world. Will order again!"</div>
+            </div>
+            <div class="acc-rev-card">
+              <div class="acc-rev-top">
+                <div class="acc-rev-av" style="background:linear-gradient(135deg,var(--golden),var(--coral))">L</div>
+                <div><div class="acc-rev-nm">Lucia P. — SW Calgary</div></div>
+                <div class="acc-rev-stars">★★★★★</div>
+              </div>
+              <div class="acc-rev-txt">"The tres leches was exactly like my abuela used to make. A true hidden gem in Calgary!"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-logo">Tropical Taste</div>
+  <p class="ft-tag">Authentic Latin Pastry — Calgary, Alberta</p>
+  <div class="ft-links">
+    <a href="menu.html">Menu</a>
+    <a href="customize.html">Design a Cake</a>
+    <a href="contact.html">Contact</a>
+    <a href="cart.html">Cart</a>
+    <a href="#">Instagram</a>
+    <a href="#">Facebook</a>
+  </div>
+  <div class="ft-bottom">&copy; 2025 Tropical Taste · Calgary, AB · All rights reserved · 48 hr advance order required 🌺</div>
+</footer>
+
+<div class="toast" id="toast"><span id="toastIco"></span><span id="toastMsg"></span></div>
+
+<script>
+/* ── CART BADGE ── */
+function updateBadge(){
+  const c = JSON.parse(localStorage.getItem('tt_cart')||'[]');
+  const n = c.reduce((s,i)=>s+(i.qty||1),0);
+  const b = document.getElementById('cartBadge');
+  if(!b) return;
+  b.textContent = n;
+  b.classList.toggle('show', n > 0);
+}
+
+/* ── QUICK ADD ── */
+function quickAdd(name, emoji, price){
+  const cart = JSON.parse(localStorage.getItem('tt_cart')||'[]');
+  const existing = cart.find(i=>i.name===name && i.type==='premade');
+  if(existing){ existing.qty = (existing.qty||1)+1; }
+  else { cart.push({id:Date.now(),type:'premade',name,emoji,details:'Standard',price,qty:1}); }
+  localStorage.setItem('tt_cart', JSON.stringify(cart));
+  updateBadge();
+  showToast(emoji, `${name} added to cart!`);
+}
+
+/* ── NAVBAR SCROLL ── */
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+  revealAll();
+}, {passive:true});
+
+/* ── HAMBURGER ── */
+document.getElementById('hamburger').addEventListener('click', function(){
+  this.classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+/* ── REVEAL ON SCROLL ── */
+function revealAll(){
+  document.querySelectorAll('.reveal:not(.on)').forEach(el=>{
+    if(el.getBoundingClientRect().top < window.innerHeight - 70)
+      el.classList.add('on');
+  });
+}
+revealAll();
+
+/* ── PARTICLES ── */
+const EMOJIS=['🌺','🎂','🍓','🌸','✨','🍰','🎀','🌴','🍮','💐'];
+const pw = document.getElementById('particles');
+for(let i=0;i<16;i++){
+  const el=document.createElement('div');
+  el.className='p';
+  el.textContent=EMOJIS[i%EMOJIS.length];
+  el.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${5+Math.random()*6}s;--delay:${Math.random()*4}s`;
+  pw.appendChild(el);
+}
+
+/* ── ACCORDION FIX — uses addEventListener, not inline onclick ── */
+document.querySelectorAll('.acc-hdr').forEach(function(btn){
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    const item = this.closest('.acc-item');
+    const isOpen = item.classList.contains('open');
+    // close all
+    document.querySelectorAll('.acc-item').forEach(function(i){ i.classList.remove('open'); });
+    // open this one if it was closed
+    if(!isOpen) item.classList.add('open');
+  });
+});
+
+/* ── TOAST ── */
+let toastTimer;
+function showToast(ico, msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastIco').textContent = ico;
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+updateBadge();
+</script>
+</body>
+</html>

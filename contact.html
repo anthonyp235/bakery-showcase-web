@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact – Tropical Taste | Calgary, AB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@300;400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --coral:#FF6B6B;--pink:#FF2D8B;--purple:#7C3AED;
+  --teal:#0D9488;--golden:#F59E0B;
+  --f-elegant:'Playfair Display',serif;--f-mod:'Montserrat',sans-serif;--f-logo:'Pacifico',cursive;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;padding-top:72px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#08000f}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:.85rem 2.5rem;background:rgba(8,0,20,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.1)}
+.nav-logo{font-family:var(--f-logo);font-size:1.7rem;color:#fff;text-decoration:none;text-shadow:0 0 30px rgba(255,107,107,.7);white-space:nowrap}
+.nav-links{display:flex;gap:1.8rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,.75);text-decoration:none;font-size:.8rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{color:var(--coral)}
+.nav-right{display:flex;align-items:center;gap:.8rem}
+.cart-link{position:relative;display:flex;align-items:center;gap:.5rem;background:none;border:1.5px solid rgba(255,255,255,.35);border-radius:50px;padding:.4rem 1rem;color:#fff;text-decoration:none;font-family:var(--f-mod);font-size:.8rem;font-weight:600;transition:all .2s}
+.cart-link:hover{background:rgba(255,255,255,.1);border-color:#fff}
+.cart-badge{position:absolute;top:-8px;right:-8px;background:var(--coral);color:#fff;border-radius:50%;width:20px;height:20px;font-size:.65rem;font-weight:700;display:none;align-items:center;justify-content:center}
+.cart-badge.show{display:flex}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px;-webkit-tap-highlight-color:transparent}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* HERO BANNER */
+.hero-banner{background:linear-gradient(140deg,#0D9488 0%,#7C3AED 50%,#FF2D8B 100%);padding:3.5rem 2rem;text-align:center;position:relative;overflow:hidden}
+.hero-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 60% 40%,rgba(255,255,255,.07),transparent 65%)}
+.banner-lbl{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.75;margin-bottom:.5rem}
+.banner-ttl{font-family:var(--f-elegant);font-size:clamp(2rem,6vw,3.5rem);font-weight:700;line-height:1.1;margin-bottom:.5rem}
+.banner-sub{font-size:.9rem;opacity:.8;max-width:500px;margin:0 auto}
+
+/* MAIN WRAPPER */
+.wrap{max-width:1100px;margin:0 auto;padding:4rem 1.5rem 5rem}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+
+/* CONTACT CARDS */
+.sec-lbl{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.55;margin-bottom:.5rem}
+.sec-ttl{font-family:var(--f-elegant);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;line-height:1.15;margin-bottom:.7rem}
+.divider{width:48px;height:4px;border-radius:2px;margin:.7rem 0 1.5rem}
+.info-cards{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:2rem}
+.info-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:1.2rem}
+.ic-ico{font-size:1.8rem;margin-bottom:.5rem}
+.ic-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;opacity:.42}
+.ic-val{font-weight:700;font-size:.9rem;margin-top:.2rem;line-height:1.4}
+.ic-val a{color:var(--coral);text-decoration:none}
+.ic-val a:hover{text-decoration:underline}
+.ic-sub{font-size:.72rem;opacity:.45;margin-top:.2rem}
+
+/* HOURS TABLE */
+.hours-table{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;margin-bottom:2rem}
+.hours-row{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.05);font-size:.88rem}
+.hours-row:last-child{border-bottom:none}
+.hours-row .day{font-weight:600;opacity:.85}
+.hours-row .time{color:var(--golden);font-weight:600}
+.hours-row.closed .time{color:rgba(255,255,255,.3);font-weight:400}
+.hours-row.today{background:rgba(255,45,139,.08);border-left:3px solid var(--pink)}
+.hours-note{font-size:.78rem;opacity:.5;padding:.6rem 1.2rem 1rem;line-height:1.5}
+
+/* MAP PLACEHOLDER */
+.map-box{background:linear-gradient(135deg,rgba(13,148,136,.15),rgba(124,58,237,.1));border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3rem 2rem;text-align:center;margin-bottom:2rem;position:relative;overflow:hidden;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem}
+.map-box::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,45,139,.08),transparent 70%)}
+.map-ico{font-size:3.5rem}
+.map-ttl{font-size:1rem;font-weight:700;opacity:.9}
+.map-sub{font-size:.82rem;opacity:.5;max-width:280px;line-height:1.6}
+.map-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.6rem 1.4rem;border-radius:50px;font-family:var(--f-mod);font-size:.8rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s;margin-top:.4rem}
+.map-btn:hover{background:rgba(255,255,255,.18)}
+
+/* SOCIAL */
+.social-row{display:flex;gap:.8rem;flex-wrap:wrap}
+.social-card{flex:1;min-width:120px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.9rem 1rem;text-align:center;text-decoration:none;color:#fff;transition:all .2s}
+.social-card:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22);transform:translateY(-2px)}
+.social-ico{font-size:1.6rem;display:block;margin-bottom:.3rem}
+.social-nm{font-size:.75rem;font-weight:700}
+.social-handle{font-size:.68rem;opacity:.45;margin-top:.1rem}
+
+/* CONTACT FORM */
+.form-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:2rem}
+.form-ttl{font-family:var(--f-elegant);font-size:1.5rem;font-weight:700;margin-bottom:.3rem}
+.form-sub{font-size:.82rem;opacity:.55;margin-bottom:1.6rem;line-height:1.6}
+.f-field{margin-bottom:1rem}
+.f-lbl{display:block;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:.35rem}
+.f-inp,.f-textarea,.f-sel{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:11px;padding:.8rem 1rem;color:#fff;font-family:var(--f-mod);font-size:.88rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.f-inp::placeholder,.f-textarea::placeholder{color:rgba(255,255,255,.28)}
+.f-inp:focus,.f-textarea:focus,.f-sel:focus{border-color:var(--pink)}
+.f-textarea{resize:vertical;min-height:110px;line-height:1.55}
+.f-sel option{background:#160028;color:#fff}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.submit-btn{width:100%;background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:1rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.92rem;cursor:pointer;transition:all .3s;letter-spacing:.04em;margin-top:.5rem;-webkit-tap-highlight-color:transparent}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(255,45,139,.4)}
+.form-success{background:rgba(13,148,136,.12);border:1px solid rgba(13,148,136,.35);border-radius:14px;padding:1.2rem 1.4rem;text-align:center;display:none;margin-top:1rem;font-size:.88rem;line-height:1.7;color:rgba(255,255,255,.85)}
+.form-success.show{display:block}
+.form-success strong{color:var(--golden)}
+
+/* FAQ */
+.faq-sec{margin-top:3.5rem}
+.faq-grid{display:flex;flex-direction:column;gap:.8rem;margin-top:1.5rem}
+.faq-item{border:1px solid rgba(255,255,255,.09);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.025)}
+.faq-item.open{border-color:rgba(255,255,255,.18)}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;background:none;border:none;color:#fff;cursor:pointer;text-align:left;font-family:var(--f-mod);font-size:.88rem;font-weight:600;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+.faq-q:hover{background:rgba(255,255,255,.04)}
+.faq-arr{width:16px;height:16px;border-right:2px solid rgba(255,255,255,.4);border-bottom:2px solid rgba(255,255,255,.4);transform:rotate(45deg);transition:transform .3s;margin-top:-4px;flex-shrink:0;pointer-events:none}
+.faq-item.open .faq-arr{transform:rotate(-135deg);margin-top:2px}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.faq-item.open .faq-a{max-height:400px}
+.faq-a-inner{padding:.2rem 1.4rem 1.2rem;font-size:.83rem;line-height:1.7;color:rgba(255,255,255,.7)}
+.faq-a-inner a{color:var(--coral);text-decoration:none}
+
+/* FOOTER */
+footer{background:linear-gradient(160deg,#0c0020 0%,#040408 100%);padding:3rem 2rem 2rem;text-align:center}
+.ft-logo{font-family:var(--f-logo);font-size:2rem;color:#fff;text-shadow:0 0 30px rgba(255,107,107,.5);margin-bottom:.3rem}
+.ft-tag{font-family:var(--f-elegant);font-style:italic;font-size:.85rem;opacity:.4;margin-bottom:1.8rem}
+.ft-links{display:flex;justify-content:center;gap:1.8rem;flex-wrap:wrap;margin-bottom:1.8rem}
+.ft-links a{color:rgba(255,255,255,.4);text-decoration:none;font-size:.78rem;transition:color .2s}
+.ft-links a:hover{color:#fff}
+.ft-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:1.3rem;font-size:.72rem;opacity:.3}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120px);background:#160028;border:1px solid rgba(255,255,255,.15);color:#fff;padding:.8rem 1.4rem;border-radius:50px;font-size:.85rem;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:.6rem;box-shadow:0 10px 40px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:900px){.two-col{grid-template-columns:1fr;gap:2rem}}
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(10,0,25,.98);padding:1.2rem 1.8rem;gap:1.2rem;border-top:1px solid rgba(255,255,255,.08);z-index:999}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+  .navbar{padding:.75rem 1.2rem}
+  .info-cards{grid-template-columns:1fr}
+  .f-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" href="index.html">Tropical Taste</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="menu.html">Menu</a></li>
+    <li><a href="customize.html">Design a Cake</a></li>
+    <li><a href="contact.html" class="active">Contact</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="cart-link" href="cart.html">🛒 Cart<span class="cart-badge" id="cartBadge"></span></a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+  <div class="banner-lbl">✦ We'd Love to Hear From You ✦</div>
+  <h1 class="banner-ttl">Contact Us</h1>
+  <p class="banner-sub">Questions about your order, custom requests or just want to say hello — we're here!</p>
+</div>
+
+<div class="wrap">
+  <div class="two-col">
+
+    <!-- LEFT: INFO -->
+    <div>
+      <div class="sec-lbl" style="color:var(--teal)">✦ Find Us ✦</div>
+      <h2 class="sec-ttl">Get in Touch</h2>
+      <div class="divider" style="background:linear-gradient(to right,var(--teal),var(--purple))"></div>
+
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="ic-ico">📍</div>
+          <div class="ic-lbl">Location</div>
+          <div class="ic-val">Calgary, Alberta<br>Canada</div>
+          <div class="ic-sub">Pickup available</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-ico">📞</div>
+          <div class="ic-lbl">Phone</div>
+          <div class="ic-val"><a href="tel:+14031234567">(403) 123-4567</a></div>
+          <div class="ic-sub">Calls &amp; WhatsApp</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-ico">📧</div>
+          <div class="ic-lbl">Email</div>
+          <div class="ic-val"><a href="mailto:orders@tropicaltaste.ca">orders@tropicaltaste.ca</a></div>
+          <div class="ic-sub">Reply within 12 hrs</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-ico">🚚</div>
+          <div class="ic-lbl">Delivery</div>
+          <div class="ic-val">Calgary city-wide</div>
+          <div class="ic-sub">$10 delivery fee</div>
+        </div>
+      </div>
+
+      <!-- MAP PLACEHOLDER -->
+      <div class="map-box">
+        <div class="map-ico">🗺️</div>
+        <div class="map-ttl">Calgary, Alberta</div>
+        <div class="map-sub">We serve the entire Calgary metro area with delivery and pickup options</div>
+        <a class="map-btn" href="https://maps.google.com/?q=Calgary+Alberta+Canada" target="_blank" rel="noopener">Open in Google Maps ↗</a>
+      </div>
+
+      <!-- HOURS -->
+      <div class="sec-lbl" style="color:var(--golden);margin-top:2rem">✦ Business Hours ✦</div>
+      <h3 style="font-family:var(--f-elegant);font-size:1.4rem;font-weight:700;margin:.4rem 0 1rem">When We're Open</h3>
+      <div class="hours-table">
+        <div class="hours-row closed"><span class="day">Monday</span><span class="time">Closed</span></div>
+        <div class="hours-row today"><span class="day">Tuesday</span><span class="time">9:00 AM – 6:00 PM</span></div>
+        <div class="hours-row"><span class="day">Wednesday</span><span class="time">9:00 AM – 6:00 PM</span></div>
+        <div class="hours-row"><span class="day">Thursday</span><span class="time">9:00 AM – 6:00 PM</span></div>
+        <div class="hours-row"><span class="day">Friday</span><span class="time">9:00 AM – 7:00 PM</span></div>
+        <div class="hours-row"><span class="day">Saturday</span><span class="time">8:00 AM – 7:00 PM</span></div>
+        <div class="hours-row"><span class="day">Sunday</span><span class="time">9:00 AM – 4:00 PM</span></div>
+        <div class="hours-note">* Holiday hours may vary. Custom cakes require 48–72 hr advance notice. Major celebrations (quinceañeras, weddings) require 5–7 business days.</div>
+      </div>
+
+      <!-- SOCIAL -->
+      <div class="sec-lbl" style="color:var(--pink);margin-top:1.8rem">✦ Follow Us ✦</div>
+      <h3 style="font-family:var(--f-elegant);font-size:1.3rem;font-weight:700;margin:.4rem 0 1rem">Stay Connected</h3>
+      <div class="social-row">
+        <a class="social-card" href="#"><span class="social-ico">📸</span><div class="social-nm">Instagram</div><div class="social-handle">@TropicalTasteYYC</div></a>
+        <a class="social-card" href="#"><span class="social-ico">👤</span><div class="social-nm">Facebook</div><div class="social-handle">Tropical Taste YYC</div></a>
+        <a class="social-card" href="#"><span class="social-ico">📱</span><div class="social-nm">WhatsApp</div><div class="social-handle">(403) 123-4567</div></a>
+        <a class="social-card" href="#"><span class="social-ico">🎵</span><div class="social-nm">TikTok</div><div class="social-handle">@TropicalTasteYYC</div></a>
+      </div>
+    </div>
+
+    <!-- RIGHT: FORM + FAQ -->
+    <div>
+      <div class="form-card">
+        <div class="form-ttl">Send Us a Message</div>
+        <p class="form-sub">Custom cake requests, event inquiries, feedback or anything else — we read every message.</p>
+
+        <div class="f-field">
+          <label class="f-lbl" for="fName">Your Name *</label>
+          <input class="f-inp" id="fName" type="text" placeholder="Your full name">
+        </div>
+        <div class="f-row">
+          <div class="f-field">
+            <label class="f-lbl" for="fEmail">Email *</label>
+            <input class="f-inp" id="fEmail" type="email" placeholder="you@email.com">
+          </div>
+          <div class="f-field">
+            <label class="f-lbl" for="fPhone">Phone</label>
+            <input class="f-inp" id="fPhone" type="tel" placeholder="(403) 000-0000">
+          </div>
+        </div>
+        <div class="f-field">
+          <label class="f-lbl" for="fTopic">Topic *</label>
+          <select class="f-sel" id="fTopic">
+            <option value="">— Select a topic —</option>
+            <option>Custom Cake Order</option>
+            <option>Event / Quinceañera</option>
+            <option>General Question</option>
+            <option>Delivery Inquiry</option>
+            <option>Wholesale / Catering</option>
+            <option>Feedback</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="f-field">
+          <label class="f-lbl" for="fDate">Event Date (if applicable)</label>
+          <input class="f-inp" id="fDate" type="date">
+        </div>
+        <div class="f-field">
+          <label class="f-lbl" for="fMsg">Message *</label>
+          <textarea class="f-textarea" id="fMsg" placeholder="Tell us about your order, event details, special requests, allergies, etc."></textarea>
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="submitForm()">Send Message 🌺</button>
+        <div class="form-success" id="formSuccess">
+          ✅ <strong>Message received!</strong> We'll get back to you at your email within 12 hours.<br>
+          For urgent orders, please call us at <strong>(403) 123-4567</strong>.
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="faq-sec">
+        <div class="sec-lbl" style="color:var(--coral)">✦ FAQ ✦</div>
+        <h2 style="font-family:var(--f-elegant);font-size:1.7rem;font-weight:700;margin:.4rem 0">Frequently Asked Questions</h2>
+        <div class="faq-grid" id="faqGrid"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-logo">Tropical Taste</div>
+  <p class="ft-tag">Authentic Latin Pastry — Calgary, Alberta</p>
+  <div class="ft-links">
+    <a href="index.html">Home</a><a href="menu.html">Menu</a>
+    <a href="customize.html">Design a Cake</a><a href="cart.html">Cart</a>
+  </div>
+  <div class="ft-bottom">&copy; 2025 Tropical Taste · Calgary, AB · All rights reserved 🌺</div>
+</footer>
+
+<div class="toast" id="toast"><span id="toastIco"></span><span id="toastMsg"></span></div>
+
+<script>
+/* ── FAQ DATA ── */
+const FAQS = [
+  {q:'How far in advance do I need to order a custom cake?',a:'We require a minimum of 48–72 hours notice for custom birthday cakes. For larger orders like quinceañeras, weddings or corporate events, please contact us at least 5–7 business days in advance. Last-minute orders may be possible depending on availability — <a href="tel:+14031234567">give us a call</a> to check!'},
+  {q:'Do you deliver across Calgary?',a:'Yes! We deliver to all Calgary neighbourhoods for a flat fee of $10. Delivery is available Tuesday through Sunday during business hours. For large or tiered cakes, we arrange a specific delivery time window to ensure safe transport.'},
+  {q:'Can I request a custom design that\'s not on the menu?',a:'Absolutely! Custom themes, characters, floral arrangements, sports, Disney and more are all possible. Use our <a href="customize.html">Cake Designer</a> for a live preview of our signature designs, or <a href="#" onclick="document.getElementById(\'fMsg\').focus();return false">send us a message</a> with your vision and we\'ll make it happen.'},
+  {q:'What payment methods do you accept?',a:'We accept Interac e-Transfer (preferred), Google Pay, and credit/debit cards (Visa, Mastercard, Amex). For e-Transfer, simply send payment to <strong>orders@tropicaltaste.ca</strong> — auto-deposit is enabled, no password needed.'},
+  {q:'Are your products allergen-free or gluten-free?',a:'Some of our items can be made gluten-free or nut-free upon request (for an additional charge). Please always disclose any allergies when placing your order. Note that our kitchen handles common allergens including gluten, nuts, dairy and eggs.'},
+  {q:'What\'s your refund or cancellation policy?',a:'Cancellations made 48+ hours before the pick-up/delivery date receive a full refund. Cancellations within 24 hours receive a 50% refund or a credit for a future order. Custom cakes cannot be refunded once baking has begun. Please <a href="tel:+14031234567">call us</a> as soon as possible if plans change.'},
+];
+
+function renderFAQ(){
+  document.getElementById('faqGrid').innerHTML = FAQS.map((item,i)=>`
+    <div class="faq-item" id="faq-${i}">
+      <button class="faq-q" type="button">
+        <span>${item.q}</span>
+        <div class="faq-arr"></div>
+      </button>
+      <div class="faq-a">
+        <div class="faq-a-inner">${item.a}</div>
+      </div>
+    </div>
+  `).join('');
+
+  /* FAQ accordion — addEventListener */
+  document.querySelectorAll('.faq-q').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      const item=this.closest('.faq-item');
+      const isOpen=item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+      if(!isOpen) item.classList.add('open');
+    });
+  });
+}
+
+/* ── CONTACT FORM ── */
+function submitForm(){
+  const name=document.getElementById('fName').value.trim();
+  const email=document.getElementById('fEmail').value.trim();
+  const topic=document.getElementById('fTopic').value;
+  const msg=document.getElementById('fMsg').value.trim();
+  if(!name||!email||!topic||!msg){
+    showToast('⚠️','Please fill in all required fields.');
+    return;
+  }
+  document.getElementById('formSuccess').classList.add('show');
+  document.getElementById('submitBtn').disabled=true;
+  document.getElementById('submitBtn').textContent='✓ Sent!';
+  showToast('✅','Message sent! We\'ll be in touch soon.');
+}
+
+/* ── BADGE ── */
+function updateBadge(){
+  const c=JSON.parse(localStorage.getItem('tt_cart')||'[]');
+  const n=c.reduce((s,i)=>s+(i.qty||1),0);
+  const b=document.getElementById('cartBadge');
+  if(b){b.textContent=n;b.classList.toggle('show',n>0);}
+}
+
+/* ── HAMBURGER ── */
+document.getElementById('hamburger').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+/* ── TOAST ── */
+let toastTimer;
+function showToast(ico,msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastIco').textContent=ico;
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* ── HIGHLIGHT TODAY ── */
+function highlightToday(){
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const today=days[new Date().getDay()];
+  document.querySelectorAll('.hours-row').forEach(row=>{
+    if(row.querySelector('.day')?.textContent===today){
+      row.classList.add('today');
+    } else {
+      row.classList.remove('today');
+    }
+  });
+}
+
+renderFAQ();
+updateBadge();
+highlightToday();
+</script>
+</body>
+</html>
