@@ -108,6 +108,9 @@ body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;pa
 .preview-lbl{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);text-align:center;margin-bottom:.9rem}
 .canvas-wrap{position:relative;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 #cakeCanvas{width:100%;display:block;border-radius:20px}
+#aiPreview{width:100%;display:none;border-radius:20px}
+#aiPreview.show{display:block}
+.gen-btn:disabled{opacity:.6;cursor:wait;transform:none;box-shadow:none}
 .gen-overlay{position:absolute;inset:0;background:rgba(10,0,25,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;opacity:0;transition:opacity .25s;pointer-events:none;border-radius:20px}
 .gen-overlay.on{opacity:1}
 .gen-spin{width:44px;height:44px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite}
@@ -279,9 +282,10 @@ footer{background:linear-gradient(160deg,#0c0020 0%,#040408 100%);padding:3rem 2
     <div class="preview-lbl">✦ Live AI Preview ✦</div>
     <div class="canvas-wrap">
       <canvas id="cakeCanvas" width="400" height="480"></canvas>
+      <img id="aiPreview" alt="AI-generated preview of your custom cake">
       <div class="gen-overlay" id="genOverlay">
         <div class="gen-spin"></div>
-        <div class="gen-txt">Rendering your cake…</div>
+        <div class="gen-txt" id="genTxt">Rendering your cake…</div>
       </div>
     </div>
     <div class="price-display">
@@ -343,8 +347,48 @@ document.getElementById('cakeText').addEventListener('input',function(){
   document.getElementById('charLeft').textContent = 30 - this.value.length;
 });
 
-/* ── GENERATE PREVIEW ── */
-document.getElementById('genBtn').addEventListener('click', triggerDraw);
+/* ── GENERATE PREVIEW (AI via backend → fal.ai) ── */
+document.getElementById('genBtn').addEventListener('click', generatePreview);
+
+async function generatePreview(){
+  const btn = document.getElementById('genBtn');
+  const ov  = document.getElementById('genOverlay');
+  const img = document.getElementById('aiPreview');
+  btn.disabled = true;
+  document.getElementById('genTxt').textContent = 'Generating your cake with AI…';
+  ov.classList.add('on');
+  try{
+    const res = await fetch('/api/generate-preview', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        design,
+        font,
+        sizeLabel,
+        message: document.getElementById('cakeText').value.trim(),
+      }),
+    });
+    const data = await res.json();
+    if(!res.ok || !data.imageUrl) throw new Error(data.error || 'Could not generate the preview.');
+
+    await new Promise((resolve, reject)=>{
+      img.onload  = resolve;
+      img.onerror = ()=>reject(new Error('Could not load the generated image.'));
+      img.src = data.imageUrl;
+    });
+    img.classList.add('show');
+    document.getElementById('cakeCanvas').style.display = 'none';
+    showToast('✨','Your AI cake preview is ready!');
+  }catch(err){
+    img.classList.remove('show');
+    document.getElementById('cakeCanvas').style.display = 'block';
+    drawCake();
+    showToast('⚠️', `${err.message} Showing sketch preview instead.`);
+  }finally{
+    ov.classList.remove('on');
+    btn.disabled = false;
+  }
+}
 
 /* ── QTY ── */
 document.getElementById('qtyMinus').addEventListener('click',()=>{ if(qty>1){qty--;updateQty();} });

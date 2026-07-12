@@ -19,6 +19,13 @@ if (!process.env.STRIPE_WEBHOOK_SECRET) {
   console.warn('    Run: stripe listen --forward-to localhost:3000/api/stripe-webhook');
 }
 
+// ── FAL.AI SETUP ────────────────────────────────────────────
+const FAL_KEY = process.env.FAL_KEY;
+if (!FAL_KEY) {
+  console.warn('⚠️  FAL_KEY is missing — AI cake previews are disabled (canvas sketch fallback).');
+  console.warn('    Get a key at https://fal.ai/dashboard/keys and paste it in .env');
+}
+
 // ── HELPERS ────────────────────────────────────────────────
 function separator(char = '─', len = 48) {
   return char.repeat(len);
@@ -234,6 +241,116 @@ app.get('/api/session-status', async (req, res) => {
   }
 });
 
+// ── AI CAKE PREVIEW (fal.ai · FLUX.1 schnell) ──────────────
+// Attribute → prompt-fragment maps. To support a new option (e.g. a new
+// flavour or a "color" attribute), add an entry here and include it in
+// buildCakePrompt() — the endpoint validates against these keys automatically.
+const PREVIEW_ATTRS = {
+  design: {
+    choco:  'strawberry and chocolate cake with dark chocolate sponge layers, pink strawberry buttercream, fresh glazed strawberries on top and a chocolate drip',
+    velvet: 'red velvet cake with deep red sponge layers, smooth white cream cheese frosting, white piped rosettes and red velvet crumb sprinkles',
+    carrot: 'carrot cake with spiced golden sponge layers, cream-colored frosting, small marzipan carrot decorations and toasted walnut pieces',
+  },
+  font: {
+    elegant: 'refined italic serif lettering',
+    playful: 'flowing cursive script lettering',
+    modern:  'bold clean sans-serif lettering',
+  },
+  size: {
+    '6"':  'small single-tier 6-inch',
+    '8"':  'two-tier 8-inch',
+    '10"': 'tall three-tier 10-inch',
+  },
+};
+
+function buildCakePrompt({ design, font, sizeLabel, message }) {
+  let prompt =
+    `Professional studio photograph of an elegant artisan ${PREVIEW_ATTRS.size[sizeLabel]} ${PREVIEW_ATTRS.design[design]}. ` +
+    `Smooth fondant finish, handcrafted details, soft diffused bakery lighting, medium shot, ` +
+    `clean pastel studio background, high resolution, photorealistic, appetizing.`;
+  if (message) {
+    prompt += ` The message "${message}" is piped on the front of the cake in ${PREVIEW_ATTRS.font[font]}.`;
+  }
+  return prompt;
+}
+
+// Cheap in-memory cooldown so a stuck button or a bot can't burn credits
+const previewCooldown = new Map();
+const PREVIEW_COOLDOWN_MS = 8000;
+
+// POST /api/generate-preview — builds the prompt server-side and calls fal.ai
+app.post('/api/generate-preview', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ success: false, error: 'AI preview is not configured on the server' });
+  }
+
+  const last = previewCooldown.get(req.ip) || 0;
+  if (Date.now() - last < PREVIEW_COOLDOWN_MS) {
+    return res.status(429).json({ success: false, error: 'Please wait a few seconds between previews' });
+  }
+
+  const { design, font, sizeLabel, message } = req.body || {};
+  if (!PREVIEW_ATTRS.design[design]) {
+    return res.status(400).json({ success: false, error: 'Invalid cake design' });
+  }
+  if (!PREVIEW_ATTRS.font[font]) {
+    return res.status(400).json({ success: false, error: 'Invalid font style' });
+  }
+  if (!PREVIEW_ATTRS.size[sizeLabel]) {
+    return res.status(400).json({ success: false, error: 'Invalid cake size' });
+  }
+  // Strip quotes/newlines so user text can't break out of the prompt template
+  const cleanMessage = typeof message === 'string'
+    ? message.replace(/["“”«»'\r\n\t]/g, '').trim().slice(0, 30)
+    : '';
+
+  const prompt = buildCakePrompt({ design, font, sizeLabel, message: cleanMessage });
+  previewCooldown.set(req.ip, Date.now());
+
+  try {
+    const falRes = await fetch('https://fal.run/fal-ai/flux/schnell', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Key ${FAL_KEY}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        image_size: 'portrait_4_3',      // closest preset to the 400×480 preview panel
+        num_inference_steps: 4,          // schnell is tuned for 1–4 steps
+        num_images: 1,
+        enable_safety_checker: true,
+      }),
+      signal: AbortSignal.timeout(45000),
+    });
+
+    if (!falRes.ok) {
+      const detail = await falRes.text();
+      console.error(`❌  fal.ai responded ${falRes.status}:`, detail.slice(0, 300));
+      return res.status(502).json({ success: false, error: 'The image service is unavailable right now' });
+    }
+
+    const data = await falRes.json();
+    const imageUrl = data.images?.[0]?.url;
+    if (!imageUrl) {
+      console.error('❌  fal.ai returned no image:', JSON.stringify(data).slice(0, 300));
+      return res.status(502).json({ success: false, error: 'No image was generated. Please try again.' });
+    }
+
+    console.log(`🎨  AI preview generated (${design} · ${sizeLabel})`);
+    console.log(`    Prompt: ${prompt}`);
+    console.log(`    Image : ${imageUrl}`);
+    res.json({ success: true, imageUrl, prompt });
+  } catch (err) {
+    const timedOut = err.name === 'TimeoutError' || err.name === 'AbortError';
+    console.error('❌  /api/generate-preview:', err.message);
+    res.status(502).json({
+      success: false,
+      error: timedOut ? 'Image generation took too long. Please try again.' : 'Could not generate the preview.',
+    });
+  }
+});
+
 // POST /api/cart
 // Receives a cake customiser item when the user clicks "Add to Cart"
 app.post('/api/cart', (req, res) => {
@@ -268,7 +385,9 @@ app.listen(PORT, () => {
   console.log(`  Cart API   : POST ${BASE_URL}/api/cart`);
   console.log(`  Checkout   : POST ${BASE_URL}/api/create-checkout-session`);
   console.log(`  Webhook    : POST ${BASE_URL}/api/stripe-webhook`);
+  console.log(`  AI preview : POST ${BASE_URL}/api/generate-preview`);
   console.log(`  Stripe     : ${stripe ? '✅ configured (' + (stripeKey.startsWith('sk_test') ? 'TEST mode' : 'LIVE mode') + ')' : '❌ keys missing in .env'}`);
+  console.log(`  fal.ai     : ${FAL_KEY ? '✅ configured (FLUX.1 schnell)' : '❌ FAL_KEY missing in .env'}`);
   console.log(separator('─'));
   console.log('  Waiting for requests...');
   console.log(separator('═') + '\n');

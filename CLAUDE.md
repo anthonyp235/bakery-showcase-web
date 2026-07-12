@@ -22,6 +22,9 @@
   - Keys live in `.env` (gitignored); `.env.example` is the committed template
   - Webhook signature verified with `STRIPE_WEBHOOK_SECRET`
 - **dotenv** — loads `.env` into `process.env` at server start
+- **fal.ai (FLUX.1 schnell)** — AI cake preview images via `POST /api/generate-preview`
+  - Key in `.env` (`FAL_KEY`); prompt template + attribute maps live in `server.js` (`PREVIEW_ATTRS`)
+  - Called with plain `fetch` to `https://fal.run/fal-ai/flux/schnell` — no SDK dependency
 
 ---
 
@@ -108,7 +111,10 @@ mi-proyecto-ia/
 - **3 fonts**: Elegant (Playfair Display italic), Playful (Dancing Script), Modern (Montserrat 900)
 - **3 sizes**: 6" ($45), 8" ($65), 10" ($85) — prices vary slightly by design
 - **Canvas**: 400×480px — drawn with 2D Canvas API (tiers, frosting, decorations, candles, text)
-- **AI note**: Preview is purely canvas-rendered. Real AI image generation (e.g. Stable Diffusion / DALL-E) is a planned future feature — the "AI-Powered Preview" label is aspirational for now
+- **AI preview (real)**: "Generate Preview" button → `POST /api/generate-preview` with `{design, font, sizeLabel, message}` → server validates against `PREVIEW_ATTRS` whitelist, builds the English prompt template, calls fal.ai FLUX.1 schnell (4 steps, `portrait_4_3`) → returns `imageUrl` → `<img id="aiPreview">` replaces the canvas
+- **Fallback**: any error (no FAL_KEY, timeout, rate limit) falls back to the canvas sketch + toast
+- **Cost guard**: 8s per-IP cooldown on the endpoint; user message is sanitized (quotes/newlines stripped, 30 chars max) before entering the prompt
+- **Extending attributes**: add an entry to `PREVIEW_ATTRS` in server.js and reference it in `buildCakePrompt()` — validation is automatic
 
 ---
 
@@ -149,7 +155,7 @@ mi-proyecto-ia/
 - [ ] **Server-side price table** — checkout session prices come from the client; validate against a canonical product list before going live
 - [ ] **Order persistence** — webhook logs payments to console only; needs a DB (SQLite via better-sqlite3 suggested) to survive restarts
 - [ ] **E-transfer file upload** — needs a backend endpoint to receive files
-- [ ] **Real AI image generation** — Canvas is a placeholder; could integrate DALL-E 3 or Replicate API
+- [x] ~~Real AI image generation~~ — **DONE**: fal.ai FLUX.1 schnell; canvas remains as fallback
 - [ ] **Order confirmation emails** — needs SMTP (e.g. SendGrid, Resend); trigger from `checkout.session.completed` webhook
 - [ ] **Admin panel** — no way to see/manage incoming orders
 - [ ] **Real gallery** — currently using emoji placeholders instead of actual photos
