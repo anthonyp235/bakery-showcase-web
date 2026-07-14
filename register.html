@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account – Tropical Taste | Calgary, AB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@300;400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --coral:#FF6B6B;--pink:#FF2D8B;--purple:#7C3AED;
+  --teal:#0D9488;--golden:#F59E0B;
+  --f-elegant:'Playfair Display',serif;--f-mod:'Montserrat',sans-serif;--f-logo:'Pacifico',cursive;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;padding-top:72px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#08000f}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:.85rem 2.5rem;background:rgba(8,0,20,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.1)}
+.nav-logo{font-family:var(--f-logo);font-size:1.7rem;color:#fff;text-decoration:none;text-shadow:0 0 30px rgba(255,107,107,.7);white-space:nowrap}
+.nav-links{display:flex;gap:1.8rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,.75);text-decoration:none;font-size:.8rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;white-space:nowrap}
+.nav-links a:hover{color:var(--coral)}
+.nav-right{display:flex;align-items:center;gap:.8rem}
+.cart-link{position:relative;display:flex;align-items:center;gap:.5rem;background:none;border:1.5px solid rgba(255,255,255,.35);border-radius:50px;padding:.4rem 1rem;color:#fff;text-decoration:none;font-family:var(--f-mod);font-size:.8rem;font-weight:600;transition:all .2s}
+.cart-link:hover{background:rgba(255,255,255,.1);border-color:#fff}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px;-webkit-tap-highlight-color:transparent}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* CARD */
+.reg-wrap{min-height:calc(100vh - 72px);display:flex;align-items:center;justify-content:center;padding:3rem 1.5rem;background:radial-gradient(circle at 50% 0%,rgba(124,58,237,.15),transparent 60%)}
+.reg-card{width:100%;max-width:440px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:2.2rem}
+.reg-ttl{font-family:var(--f-elegant);font-size:1.9rem;font-weight:700;text-align:center;margin-bottom:.4rem}
+.reg-sub{font-size:.82rem;opacity:.55;text-align:center;margin-bottom:1.8rem;line-height:1.6}
+.f-field{margin-bottom:1rem}
+.f-lbl{display:block;font-size:.74rem;font-weight:600;color:rgba(255,255,255,.55);margin-bottom:.35rem}
+.f-inp{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:11px;padding:.78rem 1rem;color:#fff;font-family:var(--f-mod);font-size:.88rem;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.f-inp::placeholder{color:rgba(255,255,255,.25)}
+.f-inp:focus{border-color:var(--pink)}
+.f-hint{font-size:.68rem;opacity:.35;margin-top:.3rem}
+.reg-btn{width:100%;background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:.95rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.9rem;cursor:pointer;transition:all .3s;margin-top:.4rem;-webkit-tap-highlight-color:transparent}
+.reg-btn:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(255,45,139,.35)}
+.reg-btn:disabled{opacity:.6;cursor:wait;transform:none;box-shadow:none}
+.reg-err{color:#ff8080;font-size:.78rem;margin-top:.8rem;text-align:center;display:none;line-height:1.5}
+.reg-err.on{display:block}
+.reg-foot{margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid rgba(255,255,255,.08);font-size:.8rem;color:rgba(255,255,255,.5);text-align:center}
+.reg-foot span{color:var(--coral);font-weight:700;cursor:pointer}
+.reg-perks{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.8rem}
+.reg-perk{display:flex;gap:.6rem;align-items:flex-start;font-size:.78rem;color:rgba(255,255,255,.6);line-height:1.5}
+
+/* FOOTER */
+footer{background:linear-gradient(160deg,#0c0020 0%,#040408 100%);padding:2rem;text-align:center;font-size:.72rem;opacity:.4}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120px);background:#160028;border:1px solid rgba(255,255,255,.15);color:#fff;padding:.8rem 1.4rem;border-radius:50px;font-size:.85rem;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:.6rem;box-shadow:0 10px 40px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(10,0,25,.98);padding:1.2rem 1.8rem;gap:1.2rem;border-top:1px solid rgba(255,255,255,.08);z-index:999}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+  .navbar{padding:.75rem 1.2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" href="index.html">Tropical Taste</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="menu.html">Menu</a></li>
+    <li><a href="customize.html">Design a Cake</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="cart-link" href="cart.html">🛒 Cart</a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="reg-wrap">
+  <div class="reg-card">
+    <h1 class="reg-ttl">Create Your Account</h1>
+    <p class="reg-sub">Join Tropical Taste to keep your cart, track your orders and check out faster.</p>
+
+    <div class="reg-perks">
+      <div class="reg-perk"><span>🛒</span><span>Your cart is saved on every device</span></div>
+      <div class="reg-perk"><span>📦</span><span>See your past orders anytime</span></div>
+      <div class="reg-perk"><span>⚡</span><span>Faster checkout with saved details</span></div>
+    </div>
+
+    <div class="f-field">
+      <label class="f-lbl" for="regName">Full Name</label>
+      <input class="f-inp" id="regName" type="text" placeholder="Your full name" autocomplete="name">
+    </div>
+    <div class="f-field">
+      <label class="f-lbl" for="regEmail">Email</label>
+      <input class="f-inp" id="regEmail" type="email" placeholder="you@email.com" autocomplete="email">
+    </div>
+    <div class="f-field">
+      <label class="f-lbl" for="regPass">Password</label>
+      <input class="f-inp" id="regPass" type="password" placeholder="Choose a password" autocomplete="new-password">
+      <div class="f-hint">At least 8 characters</div>
+    </div>
+    <div class="f-field">
+      <label class="f-lbl" for="regPass2">Confirm Password</label>
+      <input class="f-inp" id="regPass2" type="password" placeholder="Repeat your password" autocomplete="new-password">
+    </div>
+
+    <button class="reg-btn" id="regBtn">Create Account</button>
+    <p class="reg-err" id="regErr"></p>
+
+    <div class="reg-foot">Already have an account? <span id="openLogin">Sign in from the 👤 icon above</span></div>
+  </div>
+</div>
+
+<footer>&copy; 2025 Tropical Taste · Calgary, AB 🌺</footer>
+
+<div class="toast" id="toast"><span id="toastIco"></span><span id="toastMsg"></span></div>
+
+<script>
+document.getElementById('hamburger').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+let toastTimer;
+function showToast(ico,msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastIco').textContent=ico;
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+function showErr(msg){
+  const el=document.getElementById('regErr');
+  el.textContent=msg;
+  el.classList.add('on');
+}
+
+document.getElementById('regBtn').addEventListener('click', async ()=>{
+  const btn  = document.getElementById('regBtn');
+  const name = document.getElementById('regName').value.trim();
+  const email= document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const pass2= document.getElementById('regPass2').value;
+  document.getElementById('regErr').classList.remove('on');
+
+  if(name.length < 2)  return showErr('Please enter your name.');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Please enter a valid email.');
+  if(pass.length < 8)  return showErr('Password must be at least 8 characters.');
+  if(pass !== pass2)   return showErr('Passwords do not match.');
+
+  btn.disabled = true;
+  btn.textContent = 'Creating your account…';
+  try{
+    const res = await fetch('/api/auth/register',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password: pass }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Could not create the account.');
+    showToast('🎉', `Welcome, ${data.user.name.split(' ')[0]}!`);
+    setTimeout(()=>{ location.href = 'index.html'; }, 900);
+  }catch(err){
+    showErr(err.message);
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+});
+</script>
+<script src="account.js"></script>
+</body>
+</html>

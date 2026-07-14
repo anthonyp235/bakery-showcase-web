@@ -1,6 +1,10 @@
 require('dotenv').config();
-const express = require('express');
-const path    = require('path');
+const express      = require('express');
+const path         = require('path');
+const crypto       = require('crypto');
+const bcrypt       = require('bcryptjs');
+const cookieParser = require('cookie-parser');
+const db           = require('./db');
 
 const app  = express();
 const PORT     = process.env.PORT || 3000;
@@ -97,6 +101,16 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), (req,
   switch (event.type) {
     case 'checkout.session.completed': {
       const s = event.data.object;
+      recordOrder({
+        orderNumber: s.metadata.order_number,
+        email:       s.customer_details?.email || s.customer_email,
+        name:        s.metadata.customer_name,
+        phone:       s.metadata.customer_phone,
+        itemsJson:   JSON.stringify([{ summary: s.metadata.items_summary || '' }]),
+        totalCents:  s.amount_total,
+        method:      'stripe',
+        status:      'paid',
+      });
       logPayment('✅  PAYMENT SUCCESSFUL', [
         `Order #   : ${s.metadata.order_number || '(unknown)'}`,
         `Customer  : ${s.metadata.customer_name || '(unknown)'} <${s.customer_details?.email || s.customer_email}>`,
@@ -135,6 +149,14 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), (req,
 
 // ── MIDDLEWARE ──────────────────────────────────────────────
 app.use(express.json());
+app.use(cookieParser());
+
+// Block server-side files from being served publicly by express.static
+app.use((req, res, next) => {
+  const blocked = /^\/(data|node_modules)(\/|$)|^\/(server\.js|db\.js|package(-lock)?\.json|CLAUDE\.md)$/i;
+  if (blocked.test(req.path)) return res.status(404).end();
+  next();
+});
 app.use(express.static(path.join(__dirname)));   // serves index.html, menu.html, etc.
 
 // ── ENDPOINTS ──────────────────────────────────────────────
@@ -227,6 +249,19 @@ app.get('/api/session-status', async (req, res) => {
       return res.status(400).json({ success: false, error: 'session_id is required' });
     }
     const session = await stripe.checkout.sessions.retrieve(session_id);
+    // Also record here (idempotent) so history works even without the webhook CLI running
+    if (session.status === 'complete' && session.payment_status === 'paid') {
+      recordOrder({
+        orderNumber: session.metadata.order_number,
+        email:       session.customer_details?.email || session.customer_email,
+        name:        session.metadata.customer_name,
+        phone:       session.metadata.customer_phone,
+        itemsJson:   JSON.stringify([{ summary: session.metadata.items_summary || '' }]),
+        totalCents:  session.amount_total,
+        method:      'stripe',
+        status:      'paid',
+      });
+    }
     res.json({
       success:       true,
       status:        session.status,            // open | complete | expired
@@ -351,6 +386,239 @@ app.post('/api/generate-preview', async (req, res) => {
   }
 });
 
+// ── AUTH & USERS ───────────────────────────────────────────
+const SESSION_TTL_MS = 30 * 24 * 3600 * 1000;   // 30 days
+const BCRYPT_ROUNDS  = 12;
+
+function publicUser(u) {
+  return { id: u.id, name: u.name, email: u.email, phone: u.phone || '', address: u.address || '' };
+}
+
+function createSession(userId, res) {
+  const token = crypto.randomBytes(32).toString('hex');
+  db.prepare('INSERT INTO sessions (token, user_id, expires_at) VALUES (?,?,?)')
+    .run(token, userId, Date.now() + SESSION_TTL_MS);
+  res.cookie('tt_session', token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure:   process.env.NODE_ENV === 'production',
+    maxAge:   SESSION_TTL_MS,
+  });
+}
+
+function getSessionUser(req) {
+  const token = req.cookies?.tt_session;
+  if (!token) return null;
+  db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(Date.now());
+  return db.prepare(
+    'SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ? AND s.expires_at > ?'
+  ).get(token, Date.now()) || null;
+}
+
+function requireAuth(req, res) {
+  const user = getSessionUser(req);
+  if (!user) res.status(401).json({ success: false, error: 'Not signed in' });
+  return user;
+}
+
+// Find-or-create a profile by email. Guests (purchases without an account)
+// get is_guest=1 and no password; registering later upgrades the same row,
+// so their order history is kept.
+function findOrCreateUserByEmail(email, name = '', phone = '') {
+  const em = email.trim().toLowerCase();
+  let user = db.prepare('SELECT * FROM users WHERE email = ?').get(em);
+  if (!user) {
+    const info = db.prepare('INSERT INTO users (email, name, phone, is_guest) VALUES (?,?,?,1)')
+      .run(em, name, phone);
+    user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
+  }
+  return user;
+}
+
+function recordOrder({ orderNumber, email, name, phone, itemsJson, totalCents, method, status }) {
+  if (!orderNumber || !email) return;
+  const user = findOrCreateUserByEmail(email, name, phone);
+  db.prepare(
+    'INSERT OR IGNORE INTO orders (order_number, user_id, items, total_cents, payment_method, status) VALUES (?,?,?,?,?,?)'
+  ).run(orderNumber, user.id, itemsJson || '[]', totalCents || 0, method, status);
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Simple login throttle: 10 attempts per IP per 10 minutes
+const loginAttempts = new Map();
+function loginThrottled(ip) {
+  const now = Date.now();
+  const rec = loginAttempts.get(ip) || { count: 0, resetAt: now + 600000 };
+  if (now > rec.resetAt) { rec.count = 0; rec.resetAt = now + 600000; }
+  rec.count++;
+  loginAttempts.set(ip, rec);
+  return rec.count > 10;
+}
+
+// POST /api/auth/register
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body || {};
+    if (typeof name !== 'string' || name.trim().length < 2 || name.length > 100) {
+      return res.status(400).json({ success: false, error: 'Please enter your name (2–100 characters)' });
+    }
+    if (typeof email !== 'string' || !EMAIL_RE.test(email.trim()) || email.length > 200) {
+      return res.status(400).json({ success: false, error: 'Please enter a valid email' });
+    }
+    if (typeof password !== 'string' || password.length < 8 || password.length > 100) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 8 characters' });
+    }
+
+    const em = email.trim().toLowerCase();
+    const existing = db.prepare('SELECT * FROM users WHERE email = ?').get(em);
+    if (existing && existing.password_hash) {
+      return res.status(409).json({ success: false, error: 'This email already has an account. Try signing in.' });
+    }
+
+    const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    let userId;
+    if (existing) {
+      // Guest profile exists from a past purchase — upgrade it, keep history
+      db.prepare('UPDATE users SET name = ?, password_hash = ?, is_guest = 0 WHERE id = ?')
+        .run(name.trim(), hash, existing.id);
+      userId = existing.id;
+    } else {
+      userId = db.prepare('INSERT INTO users (email, name, password_hash, is_guest) VALUES (?,?,?,0)')
+        .run(em, name.trim(), hash).lastInsertRowid;
+    }
+
+    createSession(userId, res);
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    console.log(`👤  New account: ${user.name} <${user.email}>${existing ? ' (upgraded from guest)' : ''}`);
+    res.status(201).json({ success: true, user: publicUser(user) });
+  } catch (err) {
+    console.error('❌  /api/auth/register:', err.message);
+    res.status(500).json({ success: false, error: 'Could not create the account' });
+  }
+});
+
+// POST /api/auth/login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    if (loginThrottled(req.ip)) {
+      return res.status(429).json({ success: false, error: 'Too many attempts. Try again in a few minutes.' });
+    }
+    const { email, password } = req.body || {};
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ success: false, error: 'Email and password are required' });
+    }
+    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.trim().toLowerCase());
+    const ok = user?.password_hash && await bcrypt.compare(password, user.password_hash);
+    if (!ok) {
+      return res.status(401).json({ success: false, error: 'Incorrect email or password' });
+    }
+    createSession(user.id, res);
+    res.json({ success: true, user: publicUser(user) });
+  } catch (err) {
+    console.error('❌  /api/auth/login:', err.message);
+    res.status(500).json({ success: false, error: 'Could not sign in' });
+  }
+});
+
+// POST /api/auth/logout
+app.post('/api/auth/logout', (req, res) => {
+  const token = req.cookies?.tt_session;
+  if (token) db.prepare('DELETE FROM sessions WHERE token = ?').run(token);
+  res.clearCookie('tt_session');
+  res.json({ success: true });
+});
+
+// GET /api/auth/me
+app.get('/api/auth/me', (req, res) => {
+  const user = getSessionUser(req);
+  if (!user) return res.status(401).json({ success: false, error: 'Not signed in' });
+  res.json({ success: true, user: publicUser(user) });
+});
+
+// GET /api/me/cart — the signed-in user's saved cart
+app.get('/api/me/cart', (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const row = db.prepare('SELECT items FROM carts WHERE user_id = ?').get(user.id);
+  res.json({ success: true, items: row ? JSON.parse(row.items) : [] });
+});
+
+// PUT/POST /api/me/cart — save the cart (POST also accepts sendBeacon on page exit)
+function saveUserCart(req, res) {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const items = Array.isArray(req.body?.items) ? req.body.items : (Array.isArray(req.body) ? req.body : null);
+  if (!items || items.length > 50) {
+    return res.status(400).json({ success: false, error: 'Invalid cart payload' });
+  }
+  db.prepare(`
+    INSERT INTO carts (user_id, items, updated_at) VALUES (?,?,CURRENT_TIMESTAMP)
+    ON CONFLICT(user_id) DO UPDATE SET items = excluded.items, updated_at = CURRENT_TIMESTAMP
+  `).run(user.id, JSON.stringify(items).slice(0, 100000));
+  res.json({ success: true });
+}
+app.put('/api/me/cart', saveUserCart);
+app.post('/api/me/cart', saveUserCart);
+
+// GET /api/me/orders — the signed-in user's purchase history
+app.get('/api/me/orders', (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const rows = db.prepare(
+    'SELECT order_number, items, total_cents, payment_method, status, created_at FROM orders WHERE user_id = ? ORDER BY id DESC LIMIT 20'
+  ).all(user.id);
+  res.json({
+    success: true,
+    orders: rows.map(r => ({
+      orderNumber: r.order_number,
+      items:       JSON.parse(r.items),
+      totalCents:  r.total_cents,
+      method:      r.payment_method,
+      status:      r.status,
+      date:        r.created_at,
+    })),
+  });
+});
+
+// POST /api/orders — records e-Transfer orders (guest or signed in);
+// creates a guest profile for unknown emails so history is kept either way
+app.post('/api/orders', (req, res) => {
+  try {
+    const { customer, items, delivery } = req.body || {};
+    const itemError = validateItems(items);
+    if (itemError) return res.status(400).json({ success: false, error: itemError });
+    if (!customer || typeof customer.email !== 'string' || !EMAIL_RE.test(customer.email.trim())) {
+      return res.status(400).json({ success: false, error: 'A valid email is required' });
+    }
+
+    const subtotalCents = items.reduce((s, it) => s + Math.round(it.price * 100) * it.qty, 0);
+    const totalCents    = subtotalCents + (delivery?.mode === 'delivery' ? 1000 : 0);
+    const orderNumber   = 'TT-' + Date.now().toString().slice(-6);
+
+    recordOrder({
+      orderNumber,
+      email:      customer.email,
+      name:       (customer.name  || '').slice(0, 100),
+      phone:      (customer.phone || '').slice(0, 30),
+      itemsJson:  JSON.stringify(items).slice(0, 100000),
+      totalCents,
+      method:     'etransfer',
+      status:     'pending',
+    });
+
+    logPayment('📲  E-TRANSFER ORDER PLACED (awaiting payment)', [
+      `Order #  : ${orderNumber}`,
+      `Customer : ${customer.name || ''} <${customer.email}>`,
+      `Total    : $${(totalCents / 100).toFixed(2)} CAD`,
+    ]);
+    res.status(201).json({ success: true, orderNumber, totalCents });
+  } catch (err) {
+    console.error('❌  /api/orders:', err.message);
+    res.status(500).json({ success: false, error: 'Could not record the order' });
+  }
+});
+
 // POST /api/cart
 // Receives a cake customiser item when the user clicks "Add to Cart"
 app.post('/api/cart', (req, res) => {
@@ -388,6 +656,7 @@ app.listen(PORT, () => {
   console.log(`  AI preview : POST ${BASE_URL}/api/generate-preview`);
   console.log(`  Stripe     : ${stripe ? '✅ configured (' + (stripeKey.startsWith('sk_test') ? 'TEST mode' : 'LIVE mode') + ')' : '❌ keys missing in .env'}`);
   console.log(`  fal.ai     : ${FAL_KEY ? '✅ configured (FLUX.1 schnell)' : '❌ FAL_KEY missing in .env'}`);
+  console.log(`  Database   : ✅ SQLite (data/tropical.db) — users: ${db.prepare('SELECT COUNT(*) n FROM users').get().n}, orders: ${db.prepare('SELECT COUNT(*) n FROM orders').get().n}`);
   console.log(separator('─'));
   console.log('  Waiting for requests...');
   console.log(separator('═') + '\n');

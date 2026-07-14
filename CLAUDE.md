@@ -25,6 +25,10 @@
 - **fal.ai (FLUX.1 schnell)** — AI cake preview images via `POST /api/generate-preview`
   - Key in `.env` (`FAL_KEY`); prompt template + attribute maps live in `server.js` (`PREVIEW_ATTRS`)
   - Called with plain `fetch` to `https://fal.run/fal-ai/flux/schnell` — no SDK dependency
+- **SQLite via better-sqlite3@11** (v11 pinned: v12 has no Node 20 prebuilds) — `db.js` creates `data/tropical.db` (gitignored)
+  - Tables: `users`, `sessions`, `carts`, `orders` — `interests` / `important_dates` are JSON columns reserved for future use
+- **Auth**: bcryptjs (cost 12) + random-token sessions in DB + `tt_session` httpOnly cookie (30 days, SameSite=Lax)
+  - Shared widget `account.js` (included on every page) injects the 👤 icon + dropdown into `.nav-right`, handles sign in/out, shows order history, syncs cart, prefills checkout
 
 ---
 
@@ -42,6 +46,10 @@ mi-proyecto-ia/
 ├── customize.html   # Cake designer: canvas preview + add to cart → POST /api/cart
 ├── contact.html     # Contact cards, hours, inquiry form, FAQ accordion
 ├── cart.html        # Cart management + 4-step guest checkout
+├── register.html    # Create-account page
+├── account.js       # Shared auth widget: 👤 icon/dropdown, login, orders, cart sync
+├── db.js            # SQLite setup + schema (users, sessions, carts, orders)
+├── data/            # tropical.db lives here — gitignored
 └── CLAUDE.md        # This file
 ```
 
@@ -103,6 +111,17 @@ mi-proyecto-ia/
 - **Badge update**: every page reads localStorage on load and calls `updateBadge()`
 - **Cart badge** in navbar links to `cart.html` (no drawer on sub-pages)
 - **Checkout flow** (cart.html): 4 steps — Cart → Details → Payment → Review → Success
+- **Signed-in sync**: `account.js` merges localStorage ⇄ `carts` table on page load (dedup by item `id`), pushes on `pagehide` via sendBeacon; after checkout success `window.ttPushCartOnly` forces push-only so purchased items don't resurrect from the server copy
+
+---
+
+## Users & Auth
+- **Endpoints**: `POST /api/auth/register|login|logout`, `GET /api/auth/me`, `GET|PUT /api/me/cart`, `GET /api/me/orders`, `POST /api/orders` (e-transfer/guest orders)
+- **Duplicate prevention**: `users.email` UNIQUE (lowercased); registering an email that already has a password → 409
+- **Guest history**: any purchase (Stripe webhook/verify or e-transfer) does find-or-create by email with `is_guest=1`; if that person registers later the SAME row is upgraded (password set, `is_guest=0`) so past orders survive
+- **Orders recorded**: Stripe → in webhook AND in `/api/session-status` (idempotent via UNIQUE order_number); e-transfer → `POST /api/orders` (status `pending`)
+- **Login throttle**: 10 attempts / 10 min per IP (in-memory)
+- **Static blocklist**: middleware 404s `/data/*`, `/node_modules/*`, `server.js`, `db.js`, `package*.json`, `CLAUDE.md` — keep it updated when adding server-side files
 
 ---
 
@@ -153,7 +172,8 @@ mi-proyecto-ia/
 ## What's NOT Yet Implemented (Pending)
 - [x] ~~Real payment processing~~ — **DONE**: Stripe Embedded Checkout (test mode); switch to live keys when ready
 - [ ] **Server-side price table** — checkout session prices come from the client; validate against a canonical product list before going live
-- [ ] **Order persistence** — webhook logs payments to console only; needs a DB (SQLite via better-sqlite3 suggested) to survive restarts
+- [x] ~~Order persistence~~ — **DONE**: SQLite (`orders` table), recorded from Stripe webhook + session verification + e-transfer endpoint
+- [x] ~~User accounts~~ — **DONE**: register/login/logout, per-user cart + order history, guest profiles by email
 - [ ] **E-transfer file upload** — needs a backend endpoint to receive files
 - [x] ~~Real AI image generation~~ — **DONE**: fal.ai FLUX.1 schnell; canvas remains as fallback
 - [ ] **Order confirmation emails** — needs SMTP (e.g. SendGrid, Resend); trigger from `checkout.session.completed` webhook

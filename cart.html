@@ -600,7 +600,7 @@ function buildReview(){
 }
 
 /* ── PLACE ORDER ── */
-function placeOrder(){
+async function placeOrder(){
   if(currentPayment === 'stripe'){
     startStripeCheckout();
     return;
@@ -608,31 +608,60 @@ function placeOrder(){
   const btn = document.getElementById('placeOrderBtn');
   btn.disabled = true;
   btn.textContent = 'Processing…';
-  setTimeout(()=>{
-    const name = document.getElementById('gName').value;
-    const email = document.getElementById('gEmail').value;
-    const date  = document.getElementById('gDate').value;
-    const subtotal = cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
-    const delivery = deliveryMode==='delivery'?DELIVERY_FEE:0;
 
-    document.getElementById('successSub').textContent =
-      `Thank you, ${name.split(' ')[0]}! We'll contact you at ${email} to confirm your order details.`;
+  const name  = document.getElementById('gName').value;
+  const email = document.getElementById('gEmail').value;
+  const date  = document.getElementById('gDate').value;
+  const subtotal = cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  const delivery = deliveryMode==='delivery'?DELIVERY_FEE:0;
 
-    document.getElementById('successDetail').innerHTML = `
-      <strong>Order Reference:</strong> TT-${Date.now().toString().slice(-6)}<br>
-      <strong>Total Charged:</strong> $${(subtotal+delivery).toFixed(2)} CAD<br>
-      <strong>${deliveryMode==='pickup'?'Pickup':'Delivery'} Date:</strong> ${date?new Date(date+'T12:00').toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'}):''}<br>
-      ${currentPayment==='et'?`<br><strong>⚠️ Next step:</strong> Please send your e-Transfer to <strong>orders@tropicaltaste.ca</strong> to complete payment.`:''}
-      <br><br>Questions? Call us: <strong>(403) 123-4567</strong>
-    `;
+  // Record the order server-side (creates a guest history if the email has no account)
+  let orderNumber = 'TT-' + Date.now().toString().slice(-6);
+  try{
+    const res = await fetch('/api/orders',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        customer: { name, email, phone: document.getElementById('gPhone').value },
+        items: cart.map(i=>({ name:i.name, price:i.price, qty:i.qty||1 })),
+        delivery: { mode: deliveryMode, date },
+      }),
+    });
+    const data = await res.json();
+    if(res.ok && data.orderNumber) orderNumber = data.orderNumber;
+  }catch(err){
+    console.warn('Order not recorded on server:', err.message);
+  }
 
-    cart = [];
-    localStorage.removeItem('tt_cart');
-    document.getElementById('stepsBar').style.display = 'none';
-    document.getElementById('summaryCard').style.display = 'none';
-    goToStep(5);
-    showToast('✅','Order placed successfully!');
-  }, 1200);
+  document.getElementById('successSub').textContent =
+    `Thank you, ${name.split(' ')[0]}! We'll contact you at ${email} to confirm your order details.`;
+
+  document.getElementById('successDetail').innerHTML = `
+    <strong>Order Reference:</strong> ${orderNumber}<br>
+    <strong>Total:</strong> $${(subtotal+delivery).toFixed(2)} CAD<br>
+    <strong>${deliveryMode==='pickup'?'Pickup':'Delivery'} Date:</strong> ${date?new Date(date+'T12:00').toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'}):''}<br>
+    <br><strong>⚠️ Next step:</strong> Please send your e-Transfer to <strong>orders@tropicaltaste.ca</strong> to complete payment.
+    <br><br>Questions? Call us: <strong>(403) 123-4567</strong>
+  `;
+
+  cart = [];
+  localStorage.removeItem('tt_cart');
+  clearServerCart();
+  document.getElementById('stepsBar').style.display = 'none';
+  document.getElementById('summaryCard').style.display = 'none';
+  goToStep(5);
+  showToast('✅','Order placed successfully!');
+  btn.disabled = false;
+  btn.textContent = '🎂 Place My Order';
+}
+
+function clearServerCart(){
+  if(!window.ttUser) return;
+  fetch('/api/me/cart',{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ items: [] }),
+  }).catch(()=>{});
 }
 
 /* ── STRIPE EMBEDDED CHECKOUT ── */
@@ -708,6 +737,7 @@ async function handleStripeReturn(sessionId){
     if(res.ok && data.status === 'complete' && data.paymentStatus === 'paid'){
       cart = [];
       localStorage.removeItem('tt_cart');
+      clearServerCart();
       document.getElementById('stepsBar').style.display = 'none';
       document.getElementById('summaryCard').style.display = 'none';
       document.getElementById('successSub').textContent =
@@ -760,10 +790,12 @@ document.getElementById('gDate').min=minDate.toISOString().split('T')[0];
 
 const returnSessionId = new URLSearchParams(location.search).get('session_id');
 if(returnSessionId){
+  window.ttPushCartOnly = true;   // tell account.js to push local cart, not merge server's
   handleStripeReturn(returnSessionId);
 }else{
   renderCart();
 }
 </script>
+<script src="account.js"></script>
 </body>
 </html>
