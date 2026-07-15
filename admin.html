@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Orders | Tropical Taste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Montserrat:wght@300;400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --coral:#FF6B6B;--pink:#FF2D8B;--purple:#7C3AED;
+  --teal:#0D9488;--golden:#F59E0B;
+  --f-elegant:'Playfair Display',serif;--f-mod:'Montserrat',sans-serif;--f-logo:'Pacifico',cursive;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;padding-top:72px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#08000f}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:.85rem 2.5rem;background:rgba(8,0,20,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.1)}
+.nav-logo{font-family:var(--f-logo);font-size:1.7rem;color:#fff;text-decoration:none;text-shadow:0 0 30px rgba(255,107,107,.7);white-space:nowrap}
+.nav-links{display:flex;gap:1.8rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,.75);text-decoration:none;font-size:.8rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;white-space:nowrap}
+.nav-links a:hover{color:var(--coral)}
+.nav-right{display:flex;align-items:center;gap:.8rem}
+.cart-link{position:relative;display:flex;align-items:center;gap:.5rem;background:none;border:1.5px solid rgba(255,255,255,.35);border-radius:50px;padding:.4rem 1rem;color:#fff;text-decoration:none;font-family:var(--f-mod);font-size:.8rem;font-weight:600;transition:all .2s}
+.cart-link:hover{background:rgba(255,255,255,.1);border-color:#fff}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:6px;-webkit-tap-highlight-color:transparent}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* HEADER */
+.admin-head{background:linear-gradient(140deg,#3B0764 0%,#7C3AED 60%,#FF2D8B 100%);padding:2.5rem 2rem;text-align:center}
+.ah-ttl{font-family:var(--f-elegant);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700}
+.ah-sub{font-size:.85rem;opacity:.75;margin-top:.3rem}
+
+.wrap{max-width:1150px;margin:0 auto;padding:2.5rem 1.5rem 5rem}
+
+/* LOCKED STATE */
+.locked{text-align:center;padding:4rem 2rem;color:rgba(255,255,255,.5);display:none}
+.locked.on{display:block}
+.locked-ico{font-size:3.5rem;display:block;margin-bottom:1rem}
+.locked-ttl{font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:.6rem}
+.locked p{font-size:.85rem;line-height:1.7;max-width:420px;margin:0 auto 1.4rem}
+.retry-btn{background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:.8rem 1.8rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.85rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;display:none}
+.toolbar.on{display:flex}
+.tb-stats{display:flex;gap:.8rem;flex-wrap:wrap}
+.tb-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.55rem 1rem;font-size:.78rem;color:rgba(255,255,255,.6)}
+.tb-stat strong{color:var(--golden);font-size:.95rem}
+.refresh-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.75);padding:.55rem 1.2rem;border-radius:50px;font-family:var(--f-mod);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.refresh-btn:hover{background:rgba(255,255,255,.12)}
+
+/* SECTIONS */
+.sec{margin-bottom:2.8rem;display:none}
+.sec.on{display:block}
+.sec-hdr{display:flex;align-items:center;gap:.7rem;margin-bottom:1.1rem;padding-bottom:.7rem;border-bottom:1px solid rgba(255,255,255,.09)}
+.sec-ttl{font-family:var(--f-elegant);font-size:1.35rem;font-weight:700}
+.sec-count{background:rgba(255,255,255,.08);border-radius:50px;padding:.15rem .7rem;font-size:.75rem;font-weight:700;color:rgba(255,255,255,.6)}
+.sec-empty{font-size:.82rem;color:rgba(255,255,255,.3);padding:.8rem 0}
+
+/* ORDER CARDS */
+.orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:1rem}
+.o-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:1.1rem;font-size:.8rem;line-height:1.6}
+.o-card.cancelled{opacity:.55}
+.o-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;margin-bottom:.5rem}
+.o-num{font-weight:800;font-size:.95rem;color:var(--golden)}
+.o-date{font-size:.7rem;color:rgba(255,255,255,.4);text-align:right;line-height:1.4}
+.badges{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}
+.badge{border-radius:50px;padding:.14rem .6rem;font-size:.64rem;font-weight:700;letter-spacing:.04em}
+.b-paid{background:rgba(52,211,153,.14);color:#34d399;border:1px solid rgba(52,211,153,.4)}
+.b-pendpay{background:rgba(245,158,11,.13);color:var(--golden);border:1px solid rgba(245,158,11,.4)}
+.b-stripe{background:rgba(124,58,237,.16);color:#b794f6;border:1px solid rgba(124,58,237,.45)}
+.b-et{background:rgba(13,148,136,.15);color:#2dd4bf;border:1px solid rgba(13,148,136,.45)}
+.b-guest{background:rgba(255,255,255,.07);color:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.18)}
+.b-cancel{background:rgba(255,80,80,.12);color:#ff8080;border:1px solid rgba(255,80,80,.4)}
+.o-cust{color:rgba(255,255,255,.75)}
+.o-cust a{color:var(--coral);text-decoration:none}
+.o-items{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.5rem .7rem;margin:.6rem 0;color:rgba(255,255,255,.55);font-size:.74rem}
+.o-total{font-weight:800;color:#fff}
+.o-actions-toggle{width:100%;margin-top:.7rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.75);padding:.55rem;border-radius:50px;font-family:var(--f-mod);font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.o-actions-toggle:hover{background:rgba(255,255,255,.12)}
+.o-actions{display:none;margin-top:.7rem;gap:.45rem;flex-direction:column}
+.o-actions.on{display:flex}
+.act-btn{width:100%;padding:.55rem;border-radius:50px;font-family:var(--f-mod);font-size:.74rem;font-weight:700;cursor:pointer;border:1px solid;transition:all .2s;background:none;-webkit-tap-highlight-color:transparent;text-decoration:none;text-align:center;display:block}
+.act-contact{color:#2dd4bf;border-color:rgba(13,148,136,.5)}
+.act-contact:hover{background:rgba(13,148,136,.12)}
+.act-progress{color:#b794f6;border-color:rgba(124,58,237,.55)}
+.act-progress:hover{background:rgba(124,58,237,.14)}
+.act-done{color:#34d399;border-color:rgba(52,211,153,.5)}
+.act-done:hover{background:rgba(52,211,153,.12)}
+.act-cancel{color:#ff8080;border-color:rgba(255,80,80,.45)}
+.act-cancel:hover{background:rgba(255,80,80,.1)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120px);background:#160028;border:1px solid rgba(255,255,255,.15);color:#fff;padding:.8rem 1.4rem;border-radius:50px;font-size:.85rem;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:.6rem;box-shadow:0 10px 40px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(10,0,25,.98);padding:1.2rem 1.8rem;gap:1.2rem;border-top:1px solid rgba(255,255,255,.08);z-index:999}
+  .nav-links.open{display:flex}
+  .hamburger{display:flex}
+  .navbar{padding:.75rem 1.2rem}
+  .orders-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a class="nav-logo" href="index.html">Tropical Taste</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="menu.html">Menu</a></li>
+    <li><a href="customize.html">Design a Cake</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html#gallery">Gallery</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="cart-link" href="cart.html">🛒 Cart</a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="admin-head">
+  <h1 class="ah-ttl">🛠️ Order Management</h1>
+  <p class="ah-sub">Tropical Taste admin panel — incoming orders, status and workflow</p>
+</div>
+
+<div class="wrap">
+
+  <!-- LOCKED -->
+  <div class="locked" id="lockedBox">
+    <span class="locked-ico">🔒</span>
+    <div class="locked-ttl">Admin access required</div>
+    <p>Sign in with the admin account using the 👤 icon in the top bar, then try again.</p>
+    <button class="retry-btn" id="retryBtn">I'm signed in — try again</button>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar" id="toolbar">
+    <div class="tb-stats" id="tbStats"></div>
+    <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+  </div>
+
+  <!-- SECTIONS -->
+  <div class="sec" id="sec-new">
+    <div class="sec-hdr"><span>🆕</span><span class="sec-ttl">New — Unreviewed</span><span class="sec-count" id="count-new">0</span></div>
+    <div class="orders-grid" id="grid-new"></div>
+    <div class="sec-empty" id="empty-new" style="display:none">No new orders. 🎉</div>
+  </div>
+
+  <div class="sec" id="sec-in_progress">
+    <div class="sec-hdr"><span>👨‍🍳</span><span class="sec-ttl">In Progress</span><span class="sec-count" id="count-in_progress">0</span></div>
+    <div class="orders-grid" id="grid-in_progress"></div>
+    <div class="sec-empty" id="empty-in_progress" style="display:none">Nothing in the kitchen right now.</div>
+  </div>
+
+  <div class="sec" id="sec-done">
+    <div class="sec-hdr"><span>✅</span><span class="sec-ttl">Completed</span><span class="sec-count" id="count-done">0</span></div>
+    <div class="orders-grid" id="grid-done"></div>
+    <div class="sec-empty" id="empty-done" style="display:none">No completed orders yet.</div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"><span id="toastIco"></span><span id="toastMsg"></span></div>
+
+<script>
+let orders = [];
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function fmtDate(utc){
+  if(!utc) return '';
+  const d = new Date(utc.replace(' ','T')+'Z');
+  return d.toLocaleString('en-CA',{timeZone:'America/Edmonton',month:'short',day:'numeric',year:'numeric'}) +
+    '<br>' + d.toLocaleString('en-CA',{timeZone:'America/Edmonton',hour:'numeric',minute:'2-digit',hour12:true});
+}
+
+function itemsHtml(items){
+  if(!Array.isArray(items) || !items.length) return '—';
+  if(items[0].summary !== undefined) return esc(items[0].summary || '—');
+  return items.map(i=>`${i.qty}× ${esc(i.name)} — $${(i.price*i.qty).toFixed(2)}`).join('<br>');
+}
+
+function cardHtml(o){
+  const payBadge = o.paymentStatus === 'paid'
+    ? '<span class="badge b-paid">● PAID</span>'
+    : '<span class="badge b-pendpay">● PENDING PAYMENT</span>';
+  const methodBadge = o.method === 'stripe'
+    ? '<span class="badge b-stripe">💳 STRIPE</span>'
+    : '<span class="badge b-et">📲 E-TRANSFER</span>';
+  const guestBadge = o.customer.isGuest ? '<span class="badge b-guest">GUEST</span>' : '';
+  const cancelBadge = o.fulfillment === 'cancelled' ? '<span class="badge b-cancel">✕ CANCELLED</span>' : '';
+
+  const mailSubject = encodeURIComponent(`Your Tropical Taste order ${o.orderNumber}`);
+  const contactBtns = `
+    <a class="act-btn act-contact" href="mailto:${esc(o.customer.email)}?subject=${mailSubject}">✉️ Email ${esc(o.customer.name.split(' ')[0] || 'customer')}</a>
+    ${o.customer.phone ? `<a class="act-btn act-contact" href="tel:${esc(o.customer.phone)}">📞 Call ${esc(o.customer.phone)}</a>` : ''}
+  `;
+
+  let workflowBtns = '';
+  if(o.fulfillment === 'new'){
+    workflowBtns = `
+      <button class="act-btn act-progress" data-act="in_progress" data-o="${esc(o.orderNumber)}">👨‍🍳 Start — mark In Progress</button>
+      <button class="act-btn act-cancel" data-act="cancelled" data-o="${esc(o.orderNumber)}">✕ Cancel order</button>
+    `;
+  } else if(o.fulfillment === 'in_progress'){
+    workflowBtns = `
+      <button class="act-btn act-done" data-act="delivered" data-o="${esc(o.orderNumber)}">✅ Confirm as Delivered</button>
+      <button class="act-btn act-cancel" data-act="cancelled" data-o="${esc(o.orderNumber)}">✕ Cancel order</button>
+    `;
+  } else if(o.fulfillment === 'cancelled'){
+    workflowBtns = `<button class="act-btn act-progress" data-act="new" data-o="${esc(o.orderNumber)}">↩ Restore to New</button>`;
+  } else {
+    workflowBtns = `<button class="act-btn act-progress" data-act="in_progress" data-o="${esc(o.orderNumber)}">↩ Reopen — back to In Progress</button>`;
+  }
+
+  return `
+  <div class="o-card ${o.fulfillment==='cancelled'?'cancelled':''}">
+    <div class="o-top">
+      <div class="o-num">${esc(o.orderNumber)}</div>
+      <div class="o-date">${fmtDate(o.date)}</div>
+    </div>
+    <div class="badges">${payBadge}${methodBadge}${guestBadge}${cancelBadge}</div>
+    <div class="o-cust">
+      👤 ${esc(o.customer.name || '(no name)')}<br>
+      ✉️ <a href="mailto:${esc(o.customer.email)}">${esc(o.customer.email)}</a>
+      ${o.customer.phone ? `<br>📞 ${esc(o.customer.phone)}` : ''}
+    </div>
+    <div class="o-items">${itemsHtml(o.items)}</div>
+    <div class="o-total">Total: $${(o.totalCents/100).toFixed(2)} CAD</div>
+    <button class="o-actions-toggle">⚙️ Actions</button>
+    <div class="o-actions">${contactBtns}${workflowBtns}</div>
+  </div>`;
+}
+
+function render(){
+  const groups = { new: [], in_progress: [], done: [] };
+  orders.forEach(o=>{
+    if(o.fulfillment === 'new') groups.new.push(o);
+    else if(o.fulfillment === 'in_progress') groups.in_progress.push(o);
+    else groups.done.push(o);   // delivered + cancelled
+  });
+
+  const revenue = orders
+    .filter(o=>o.paymentStatus==='paid' && o.fulfillment!=='cancelled')
+    .reduce((s,o)=>s+o.totalCents,0);
+  document.getElementById('tbStats').innerHTML = `
+    <div class="tb-stat"><strong>${orders.length}</strong> total orders</div>
+    <div class="tb-stat"><strong>${groups.new.length}</strong> awaiting review</div>
+    <div class="tb-stat"><strong>$${(revenue/100).toFixed(2)}</strong> paid revenue</div>
+  `;
+
+  Object.entries(groups).forEach(([key,list])=>{
+    document.getElementById(`sec-${key}`).classList.add('on');
+    document.getElementById(`count-${key}`).textContent = list.length;
+    document.getElementById(`grid-${key}`).innerHTML = list.map(cardHtml).join('');
+    document.getElementById(`empty-${key}`).style.display = list.length ? 'none' : 'block';
+  });
+}
+
+async function load(){
+  try{
+    const res = await fetch('/api/admin/orders');
+    if(res.status === 401 || res.status === 403){
+      document.getElementById('lockedBox').classList.add('on');
+      document.getElementById('toolbar').classList.remove('on');
+      ['new','in_progress','done'].forEach(k=>document.getElementById(`sec-${k}`).classList.remove('on'));
+      return;
+    }
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Could not load orders');
+    orders = data.orders;
+    document.getElementById('lockedBox').classList.remove('on');
+    document.getElementById('toolbar').classList.add('on');
+    render();
+  }catch(err){
+    showToast('⚠️', err.message);
+  }
+}
+
+async function setFulfillment(orderNumber, fulfillment){
+  try{
+    const res = await fetch(`/api/admin/orders/${encodeURIComponent(orderNumber)}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ fulfillment }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Update failed');
+    const labels = { new:'restored to New', in_progress:'marked In Progress', delivered:'confirmed as Delivered', cancelled:'cancelled' };
+    showToast('✅', `${orderNumber} ${labels[fulfillment]}`);
+    await load();
+  }catch(err){
+    showToast('⚠️', err.message);
+  }
+}
+
+/* Delegated clicks: actions toggle, workflow buttons, cancel confirmation */
+document.addEventListener('click', e=>{
+  const toggle = e.target.closest('.o-actions-toggle');
+  if(toggle){
+    toggle.nextElementSibling.classList.toggle('on');
+    return;
+  }
+  const btn = e.target.closest('.act-btn[data-act]');
+  if(!btn) return;
+  const act = btn.dataset.act;
+  if(act === 'cancelled' && btn.dataset.confirmed !== '1'){
+    btn.dataset.confirmed = '1';
+    btn.textContent = '⚠️ Click again to confirm cancellation';
+    setTimeout(()=>{ btn.dataset.confirmed = ''; btn.textContent = '✕ Cancel order'; }, 3000);
+    return;
+  }
+  setFulfillment(btn.dataset.o, act);
+});
+
+document.getElementById('retryBtn').addEventListener('click', load);
+document.getElementById('refreshBtn').addEventListener('click', load);
+
+document.getElementById('hamburger').addEventListener('click',function(){
+  this.classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+let toastTimer;
+function showToast(ico,msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastIco').textContent=ico;
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+load();
+setInterval(load, 30000);   // auto-refresh every 30s
+</script>
+<script src="account.js"></script>
+</body>
+</html>

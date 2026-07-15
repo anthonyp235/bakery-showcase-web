@@ -389,9 +389,14 @@ app.post('/api/generate-preview', async (req, res) => {
 // ── AUTH & USERS ───────────────────────────────────────────
 const SESSION_TTL_MS = 30 * 24 * 3600 * 1000;   // 30 days
 const BCRYPT_ROUNDS  = 12;
+const ADMIN_EMAIL    = (process.env.ADMIN_EMAIL || 'admin@tropicaltaste.ca').toLowerCase();
 
 function publicUser(u) {
-  return { id: u.id, name: u.name, email: u.email, phone: u.phone || '', address: u.address || '' };
+  return {
+    id: u.id, name: u.name, email: u.email,
+    phone: u.phone || '', address: u.address || '',
+    isAdmin: u.email === ADMIN_EMAIL,
+  };
 }
 
 function createSession(userId, res) {
@@ -579,6 +584,63 @@ app.get('/api/me/orders', (req, res) => {
       date:        r.created_at,
     })),
   });
+});
+
+// ── ADMIN ──────────────────────────────────────────────────
+function requireAdmin(req, res) {
+  const user = getSessionUser(req);
+  if (!user || user.email !== ADMIN_EMAIL) {
+    res.status(403).json({ success: false, error: 'Admin access required' });
+    return null;
+  }
+  return user;
+}
+
+// GET /api/admin/orders — every order with customer info, newest first
+app.get('/api/admin/orders', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const rows = db.prepare(`
+    SELECT o.order_number, o.items, o.total_cents, o.payment_method, o.status,
+           o.fulfillment, o.created_at,
+           u.name AS customer_name, u.email AS customer_email, u.phone AS customer_phone, u.is_guest
+    FROM orders o JOIN users u ON u.id = o.user_id
+    ORDER BY o.id DESC
+  `).all();
+  res.json({
+    success: true,
+    orders: rows.map(r => ({
+      orderNumber:   r.order_number,
+      items:         JSON.parse(r.items),
+      totalCents:    r.total_cents,
+      method:        r.payment_method,
+      paymentStatus: r.status,
+      fulfillment:   r.fulfillment,
+      date:          r.created_at,
+      customer: {
+        name:    r.customer_name,
+        email:   r.customer_email,
+        phone:   r.customer_phone || '',
+        isGuest: !!r.is_guest,
+      },
+    })),
+  });
+});
+
+// PATCH /api/admin/orders/:orderNumber — move an order through the workflow
+const FULFILLMENT_STATES = ['new', 'in_progress', 'delivered', 'cancelled'];
+app.patch('/api/admin/orders/:orderNumber', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const { fulfillment } = req.body || {};
+  if (!FULFILLMENT_STATES.includes(fulfillment)) {
+    return res.status(400).json({ success: false, error: `fulfillment must be one of: ${FULFILLMENT_STATES.join(', ')}` });
+  }
+  const info = db.prepare('UPDATE orders SET fulfillment = ? WHERE order_number = ?')
+    .run(fulfillment, req.params.orderNumber);
+  if (info.changes === 0) {
+    return res.status(404).json({ success: false, error: 'Order not found' });
+  }
+  console.log(`🛠️   Admin: order ${req.params.orderNumber} → ${fulfillment}`);
+  res.json({ success: true });
 });
 
 // POST /api/orders — records e-Transfer orders (guest or signed in);

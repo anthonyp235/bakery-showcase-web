@@ -103,6 +103,7 @@
       dd.innerHTML = `
         <div class="acct-ttl">👋 Hi, ${esc(ttUser.name.split(' ')[0])}</div>
         <div class="acct-sub">${esc(ttUser.email)}</div>
+        ${ttUser.isAdmin ? '<a href="admin.html" style="display:block;text-align:center;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.4);color:#F59E0B;padding:.55rem;border-radius:50px;font-size:.78rem;font-weight:700;text-decoration:none;margin-bottom:.8rem">🛠️ Admin Panel</a>' : ''}
         <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.4rem">Recent Orders</div>
         <div class="acct-orders" id="acctOrders"><div class="acct-empty">Loading…</div></div>
         <button class="acct-logout" id="acctLogoutBtn">Sign Out</button>

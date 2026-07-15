@@ -54,4 +54,11 @@ CREATE INDEX IF NOT EXISTS idx_orders_user    ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_exp   ON sessions(expires_at);
 `);
 
+// Migration: admin workflow state, separate from payment status.
+// fulfillment: new → in_progress → delivered (or cancelled)
+const orderCols = db.prepare('PRAGMA table_info(orders)').all();
+if (!orderCols.some(c => c.name === 'fulfillment')) {
+  db.exec("ALTER TABLE orders ADD COLUMN fulfillment TEXT NOT NULL DEFAULT 'new'");
+}
+
 module.exports = db;

@@ -47,6 +47,7 @@ mi-proyecto-ia/
 ├── contact.html     # Contact cards, hours, inquiry form, FAQ accordion
 ├── cart.html        # Cart management + 4-step guest checkout
 ├── register.html    # Create-account page
+├── admin.html       # Admin order dashboard (needs ADMIN_EMAIL account)
 ├── account.js       # Shared auth widget: 👤 icon/dropdown, login, orders, cart sync
 ├── db.js            # SQLite setup + schema (users, sessions, carts, orders)
 ├── data/            # tropical.db lives here — gitignored
@@ -125,6 +126,16 @@ mi-proyecto-ia/
 
 ---
 
+## Admin Panel (admin.html)
+- **Access**: the account whose email equals `ADMIN_EMAIL` in `.env` (default `admin@tropicaltaste.ca`) — register that email normally, then the 👤 dropdown shows a "🛠️ Admin Panel" link; `publicUser()` exposes `isAdmin`
+- **Endpoints**: `GET /api/admin/orders` (all orders + customer join), `PATCH /api/admin/orders/:orderNumber` `{fulfillment}` — both 403 for non-admins
+- **Workflow column**: `orders.fulfillment` = `new → in_progress → delivered | cancelled` (separate from payment `status`); added via PRAGMA migration in db.js
+- **Sections**: New/Unreviewed · In Progress · Completed (delivered + cancelled greyed out)
+- **Per-order actions** (⚙️ Actions toggle): email/call customer (mailto/tel), start (→ in_progress), confirm delivered, cancel (two-click confirm), reopen/restore
+- **Auto-refresh**: every 30s + manual ↻ button; shows totals + paid revenue in toolbar
+
+---
+
 ## Cake Customizer (customize.html + index.html teaser)
 - **3 designs**: Strawberry & Chocolate (`choco`), Red Velvet (`velvet`), Carrot Cake (`carrot`)
 - **3 fonts**: Elegant (Playfair Display italic), Playful (Dancing Script), Modern (Montserrat 900)
@@ -177,7 +188,7 @@ mi-proyecto-ia/
 - [ ] **E-transfer file upload** — needs a backend endpoint to receive files
 - [x] ~~Real AI image generation~~ — **DONE**: fal.ai FLUX.1 schnell; canvas remains as fallback
 - [ ] **Order confirmation emails** — needs SMTP (e.g. SendGrid, Resend); trigger from `checkout.session.completed` webhook
-- [ ] **Admin panel** — no way to see/manage incoming orders
+- [x] ~~Admin panel~~ — **DONE**: admin.html with sections, workflow states, contact actions
 - [ ] **Real gallery** — currently using emoji placeholders instead of actual photos
 - [ ] **Google Maps embed** — placeholder box, not a real map
 - [ ] **Product photos** — all product cards use emoji, need real food photography
