@@ -401,9 +401,29 @@ function checkHash(){
   }
 }
 
+/* ── SERVER PRICES ── */
+/* The embedded prices above are only a fallback — the server list
+   (prices.js → GET /api/prices) is the source of truth. */
+async function loadPrices(){
+  try{
+    const res = await fetch('/api/prices');
+    if(!res.ok) return;
+    const data = await res.json();
+    Object.values(MENU).forEach(items=>{
+      items.forEach(item=>{
+        const sizes = data.products[item.name];
+        if(!sizes) return;
+        item.sizes.forEach(s=>{ if(sizes[s.l] !== undefined) s.p = sizes[s.l]; });
+      });
+    });
+    renderMenu();
+  }catch(err){ /* server offline — embedded prices stay */ }
+}
+
 renderMenu();
 updateBadge();
 checkHash();
+loadPrices();
 </script>
 <script src="account.js"></script>
 </body>

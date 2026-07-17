@@ -50,6 +50,7 @@ mi-proyecto-ia/
 ├── admin.html       # Admin order dashboard (needs ADMIN_EMAIL account)
 ├── account.js       # Shared auth widget: 👤 icon/dropdown, login, orders, cart sync
 ├── db.js            # SQLite setup + schema (users, sessions, carts, orders)
+├── prices.js        # Canonical price list — edit prices HERE (never in HTML)
 ├── data/            # tropical.db lives here — gitignored
 └── CLAUDE.md        # This file
 ```
@@ -155,7 +156,15 @@ mi-proyecto-ia/
    - Declines (insufficient funds, invalid card, etc.) are shown inline by Stripe's form; the backend also logs `payment_intent.payment_failed` with the decline code via webhook
    - Webhook `POST /api/stripe-webhook` uses `express.raw()` and MUST stay registered before `express.json()`
    - Server endpoints: `GET /api/stripe-config`, `POST /api/create-checkout-session`, `GET /api/session-status`, `POST /api/stripe-webhook`
-   - ⚠️ Prices are still client-supplied (validated with bounds only) — move to a server-side price table before going live
+
+---
+
+## Prices (server-side source of truth)
+- **`prices.js`** — canonical price list: `PRODUCTS` (name → {sizeLabel: price}), `CUSTOM_DESIGNS` (customizer design → product name), `DELIVERY_FEE`; blocked from static serving
+- **`GET /api/prices`** returns the whole list; pages fetch it on load (embedded prices in HTML are offline fallback only)
+- **Checkout is tamper-proof**: `repriceItems()` in both `/api/create-checkout-session` and `/api/orders` replaces client-sent prices with canonical ones by exact full-name lookup (`"Red Velvet Cake (8\")"`); unknown product names → 400
+- **Frontend consumers**: menu.html re-renders grid with server prices; customize.html re-prices size buttons per design (velvet costs more) + "From $X" labels; cart.html re-prices stored localStorage items (toast if changed) and updates the delivery fee label
+- **To change a price**: edit `prices.js`, restart server (nodemon does it) — all pages + checkout pick it up; no HTML edits needed
 
 ---
 
@@ -182,7 +191,7 @@ mi-proyecto-ia/
 
 ## What's NOT Yet Implemented (Pending)
 - [x] ~~Real payment processing~~ — **DONE**: Stripe Embedded Checkout (test mode); switch to live keys when ready
-- [ ] **Server-side price table** — checkout session prices come from the client; validate against a canonical product list before going live
+- [x] ~~Server-side price table~~ — **DONE**: `prices.js` + `GET /api/prices`; checkout re-prices every item server-side
 - [x] ~~Order persistence~~ — **DONE**: SQLite (`orders` table), recorded from Stripe webhook + session verification + e-transfer endpoint
 - [x] ~~User accounts~~ — **DONE**: register/login/logout, per-user cart + order history, guest profiles by email
 - [ ] **E-transfer file upload** — needs a backend endpoint to receive files

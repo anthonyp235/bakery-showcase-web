@@ -5,6 +5,7 @@ const crypto       = require('crypto');
 const bcrypt       = require('bcryptjs');
 const cookieParser = require('cookie-parser');
 const db           = require('./db');
+const { DELIVERY_FEE, PRODUCTS, CUSTOM_DESIGNS, lookupPrice } = require('./prices');
 
 const app  = express();
 const PORT     = process.env.PORT || 3000;
@@ -83,6 +84,17 @@ function validateItems(items) {
   return null;
 }
 
+// Replace client-sent prices with the canonical ones from prices.js.
+// Returns an error string if any item isn't a known product.
+function repriceItems(items) {
+  for (const it of items) {
+    const canonical = lookupPrice(it.name);
+    if (canonical === null) return `Unknown product: ${it.name}`;
+    it.price = canonical;
+  }
+  return null;
+}
+
 // ── STRIPE WEBHOOK ─────────────────────────────────────────
 // Registered BEFORE express.json() — signature verification needs the
 // raw request body, not the parsed one.
@@ -153,13 +165,23 @@ app.use(cookieParser());
 
 // Block server-side files from being served publicly by express.static
 app.use((req, res, next) => {
-  const blocked = /^\/(data|node_modules)(\/|$)|^\/(server\.js|db\.js|package(-lock)?\.json|CLAUDE\.md)$/i;
+  const blocked = /^\/(data|node_modules)(\/|$)|^\/(server\.js|db\.js|prices\.js|package(-lock)?\.json|CLAUDE\.md)$/i;
   if (blocked.test(req.path)) return res.status(404).end();
   next();
 });
 app.use(express.static(path.join(__dirname)));   // serves index.html, menu.html, etc.
 
 // ── ENDPOINTS ──────────────────────────────────────────────
+
+// GET /api/prices — canonical price list for all pages
+app.get('/api/prices', (req, res) => {
+  res.json({
+    success:       true,
+    deliveryFee:   DELIVERY_FEE,
+    products:      PRODUCTS,
+    customDesigns: CUSTOM_DESIGNS,
+  });
+});
 
 // GET /api/stripe-config — frontend fetches the publishable key from here
 // so it never has to be hardcoded in the HTML.
@@ -180,6 +202,8 @@ app.post('/api/create-checkout-session', async (req, res) => {
 
     const itemError = validateItems(items);
     if (itemError) return res.status(400).json({ success: false, error: itemError });
+    const priceError = repriceItems(items);   // charge canonical prices, never client-sent ones
+    if (priceError) return res.status(400).json({ success: false, error: priceError });
     if (!customer || typeof customer.email !== 'string' || !customer.email.includes('@')) {
       return res.status(400).json({ success: false, error: 'A valid customer email is required' });
     }
@@ -200,7 +224,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'cad',
           product_data: { name: 'Delivery — Calgary area' },
-          unit_amount: 1000,
+          unit_amount: DELIVERY_FEE * 100,
         },
         quantity: 1,
       });
@@ -650,12 +674,14 @@ app.post('/api/orders', (req, res) => {
     const { customer, items, delivery } = req.body || {};
     const itemError = validateItems(items);
     if (itemError) return res.status(400).json({ success: false, error: itemError });
+    const priceError = repriceItems(items);   // charge canonical prices, never client-sent ones
+    if (priceError) return res.status(400).json({ success: false, error: priceError });
     if (!customer || typeof customer.email !== 'string' || !EMAIL_RE.test(customer.email.trim())) {
       return res.status(400).json({ success: false, error: 'A valid email is required' });
     }
 
     const subtotalCents = items.reduce((s, it) => s + Math.round(it.price * 100) * it.qty, 0);
-    const totalCents    = subtotalCents + (delivery?.mode === 'delivery' ? 1000 : 0);
+    const totalCents    = subtotalCents + (delivery?.mode === 'delivery' ? DELIVERY_FEE * 100 : 0);
     const orderNumber   = 'TT-' + Date.now().toString().slice(-6);
 
     recordOrder({

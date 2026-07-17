@@ -449,7 +449,37 @@ let cart = JSON.parse(localStorage.getItem('tt_cart')||'[]');
 let currentStep = 1;
 let deliveryMode = 'pickup';
 let currentPayment = 'et';
-const DELIVERY_FEE = 10;
+let DELIVERY_FEE = 10;   // fallback — server value loaded by loadPrices()
+
+/* ── SERVER PRICES ── */
+/* Items in localStorage keep the price from when they were added;
+   re-price them against the canonical server list so a price change
+   in prices.js is reflected here immediately. */
+async function loadPrices(){
+  try{
+    const res = await fetch('/api/prices');
+    if(!res.ok) return;
+    const data = await res.json();
+    DELIVERY_FEE = data.deliveryFee;
+    const sub = document.querySelector('#del-delivery .del-opt-sub');
+    if(sub) sub.textContent = `+$${DELIVERY_FEE} · Calgary area`;
+
+    const priceMap = {};
+    Object.entries(data.products).forEach(([name,sizes])=>{
+      Object.entries(sizes).forEach(([label,price])=>{ priceMap[`${name} (${label})`] = price; });
+    });
+    let changed = false;
+    cart.forEach(item=>{
+      const p = priceMap[item.name];
+      if(p !== undefined && item.price !== p){ item.price = p; changed = true; }
+    });
+    if(changed){
+      saveCart();
+      showToast('🏷️','Prices were updated to the latest list.');
+    }
+    renderCart();
+  }catch(err){ /* server offline — stored prices stay */ }
+}
 
 /* ── RENDER CART ── */
 function renderCart(){
@@ -794,6 +824,7 @@ if(returnSessionId){
   handleStripeReturn(returnSessionId);
 }else{
   renderCart();
+  loadPrices();
 }
 </script>
 <script src="account.js"></script>

@@ -319,6 +319,7 @@ document.querySelectorAll('.cake-opt').forEach(el=>{
     document.querySelectorAll('.cake-opt').forEach(o=>o.classList.remove('sel'));
     this.classList.add('sel');
     design = this.dataset.design;
+    applyPrices();
   });
 });
 
@@ -403,7 +404,7 @@ function updatePrice(){
 
 /* ── ADD TO CART ── */
 document.getElementById('atcBtn').addEventListener('click', async () => {
-  const designNames = {choco:'Strawberry & Chocolate',velvet:'Red Velvet',carrot:'Carrot Cake'};
+  const designNames = {choco:'Strawberry & Chocolate',velvet:'Red Velvet',carrot:'Carrot'};
   const fontNames   = {elegant:'Elegant',playful:'Playful',modern:'Modern'};
   const txt   = document.getElementById('cakeText').value.trim();
   const emoji = design==='choco'?'🍓🍫':design==='velvet'?'🍰':'🥕';
@@ -639,8 +640,45 @@ function showToast(ico,msg){
   toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
 }
 
+/* ── SERVER PRICES ── */
+/* Prices in the HTML are only a fallback — prices.js on the server
+   (via GET /api/prices) is the source of truth, and varies by design. */
+let PRICES = null;
+
+function designSizes(d){
+  if(!PRICES) return null;
+  return PRICES.products[PRICES.customDesigns[d]] || null;
+}
+
+function applyPrices(){
+  const sizes = designSizes(design);
+  if(!sizes) return;
+  document.querySelectorAll('.size-opt').forEach(el=>{
+    const p = sizes[el.dataset.label];
+    if(p === undefined) return;
+    el.dataset.price = p;
+    el.querySelector('.size-opt-pr').textContent = `$${p}`;
+  });
+  if(sizes[sizeLabel] !== undefined) sizePrice = sizes[sizeLabel];
+  updatePrice();
+}
+
+async function loadPrices(){
+  try{
+    const res = await fetch('/api/prices');
+    if(!res.ok) return;
+    PRICES = await res.json();
+    document.querySelectorAll('.cake-opt').forEach(el=>{
+      const sizes = designSizes(el.dataset.design);
+      if(sizes) el.querySelector('.cake-opt-pr').textContent = `From $${Math.min(...Object.values(sizes))}`;
+    });
+    applyPrices();
+  }catch(err){ /* server offline — fallback prices stay */ }
+}
+
 /* ── INIT ── */
 updateBadge();
+loadPrices();
 document.fonts.ready.then(()=>triggerDraw());
 </script>
 <script src="account.js"></script>
