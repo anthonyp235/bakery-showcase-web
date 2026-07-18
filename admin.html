@@ -100,6 +100,69 @@ body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;pa
 .act-cancel{color:#ff8080;border-color:rgba(255,80,80,.45)}
 .act-cancel:hover{background:rgba(255,80,80,.1)}
 
+/* VIEW TABS */
+.view-tabs{display:none;gap:.6rem;margin-bottom:2rem}
+.view-tabs.on{display:flex}
+.view-tab{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:.65rem 1.5rem;border-radius:50px;font-family:var(--f-mod);font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.view-tab:hover{background:rgba(255,255,255,.1)}
+.view-tab.active{background:linear-gradient(135deg,var(--coral),var(--pink));border-color:transparent;color:#fff}
+
+/* INVENTORY */
+.inv-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:2rem;flex-wrap:wrap}
+.fee-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.9rem 1.1rem}
+.f-lbl{display:block;font-size:.72rem;font-weight:600;color:rgba(255,255,255,.55);margin-bottom:.35rem}
+.inv-inp{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);border-radius:10px;padding:.6rem .8rem;color:#fff;font-family:var(--f-mod);font-size:.84rem;outline:none;transition:border-color .2s;width:100%;-webkit-appearance:none}
+.inv-inp:focus{border-color:var(--pink)}
+.inv-inp::placeholder{color:rgba(255,255,255,.25)}
+select.inv-inp option{background:#0c0018;color:#fff}
+.inv-btn-sm{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);padding:.55rem .9rem;border-radius:50px;font-family:var(--f-mod);font-size:.74rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.inv-btn-sm:hover{background:rgba(255,255,255,.15)}
+.add-prod-btn{background:linear-gradient(135deg,var(--teal),#059669);color:#fff;border:none;padding:.8rem 1.6rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.85rem;cursor:pointer;transition:all .3s;-webkit-tap-highlight-color:transparent}
+.add-prod-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(13,148,136,.4)}
+.inv-cat-hdr{display:flex;align-items:center;gap:.7rem;margin:1.8rem 0 .9rem;padding-bottom:.6rem;border-bottom:1px solid rgba(255,255,255,.09)}
+.inv-cat-ttl{font-family:var(--f-elegant);font-size:1.2rem;font-weight:700}
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.9rem}
+.p-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.9rem;display:flex;gap:.8rem;align-items:flex-start}
+.p-card.inactive{opacity:.45}
+.p-thumb{width:56px;height:56px;border-radius:12px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;overflow:hidden}
+.p-thumb img{width:100%;height:100%;object-fit:cover}
+.p-info{flex:1;min-width:0;font-size:.75rem;line-height:1.55}
+.p-nm{font-weight:800;font-size:.86rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.p-badge{background:rgba(245,158,11,.14);color:var(--golden);border:1px solid rgba(245,158,11,.4);border-radius:50px;padding:.05rem .5rem;font-size:.6rem;font-weight:700}
+.p-hidden{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:.05rem .5rem;font-size:.6rem;font-weight:700}
+.p-sizes{color:rgba(255,255,255,.55)}
+.p-sizes strong{color:var(--golden)}
+.p-edit{background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.5);color:#b794f6;padding:.45rem .9rem;border-radius:50px;font-family:var(--f-mod);font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.p-edit:hover{background:rgba(124,58,237,.25)}
+
+/* EDITOR */
+.editor-ov{position:fixed;inset:0;background:rgba(4,0,10,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:5rem 1rem 2rem;overflow-y:auto}
+.editor-ov.on{display:flex}
+.editor{width:100%;max-width:640px;background:#150125;border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:1.6rem}
+.ed-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.ed-ttl{font-family:var(--f-elegant);font-size:1.4rem;font-weight:700}
+.ed-close{background:none;border:none;color:rgba(255,255,255,.5);font-size:1.1rem;cursor:pointer;padding:.3rem .6rem;border-radius:8px;-webkit-tap-highlight-color:transparent}
+.ed-close:hover{background:rgba(255,255,255,.1);color:#fff}
+.ed-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.ed-field{min-width:0}
+.img-row{display:flex;gap:.9rem;align-items:flex-start}
+.img-preview{width:84px;height:84px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:2.2rem;overflow:hidden;flex-shrink:0}
+.img-preview img{width:100%;height:100%;object-fit:cover}
+.size-row{display:grid;grid-template-columns:1fr 1fr 90px 34px;gap:.5rem;margin-bottom:.5rem;align-items:center}
+.size-rm{background:none;border:1px solid rgba(255,80,80,.4);color:#ff8080;border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:.85rem;-webkit-tap-highlight-color:transparent}
+.size-rm:hover{background:rgba(255,80,80,.12)}
+.ed-active{display:flex;align-items:center;gap:.6rem;font-size:.8rem;color:rgba(255,255,255,.7);cursor:pointer}
+.ed-active input{width:16px;height:16px;accent-color:var(--pink)}
+.ed-err{color:#ff8080;font-size:.78rem;margin-top:.8rem;display:none;line-height:1.5}
+.ed-err.on{display:block}
+.ed-btns{display:flex;gap:.7rem;margin-top:1.3rem;justify-content:flex-end;flex-wrap:wrap}
+.ed-save{background:linear-gradient(135deg,var(--coral),var(--pink));color:#fff;border:none;padding:.75rem 1.6rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.82rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ed-save:disabled{opacity:.6;cursor:wait}
+.ed-cancel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);padding:.75rem 1.3rem;border-radius:50px;font-family:var(--f-mod);font-weight:600;font-size:.82rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ed-del{background:none;border:1px solid rgba(255,80,80,.45);color:#ff8080;padding:.75rem 1.3rem;border-radius:50px;font-family:var(--f-mod);font-weight:700;font-size:.82rem;cursor:pointer;margin-right:auto;-webkit-tap-highlight-color:transparent}
+.ed-del:hover{background:rgba(255,80,80,.1)}
+@media(max-width:600px){.ed-grid{grid-template-columns:1fr}.size-row{grid-template-columns:1fr 1fr 70px 34px}}
+
 /* TOAST */
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(120px);background:#160028;border:1px solid rgba(255,255,255,.15);color:#fff;padding:.8rem 1.4rem;border-radius:50px;font-size:.85rem;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:.6rem;box-shadow:0 10px 40px rgba(0,0,0,.5);white-space:nowrap;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -133,8 +196,8 @@ body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;pa
 </nav>
 
 <div class="admin-head">
-  <h1 class="ah-ttl">🛠️ Order Management</h1>
-  <p class="ah-sub">Tropical Taste admin panel — incoming orders, status and workflow</p>
+  <h1 class="ah-ttl">🛠️ Admin Panel</h1>
+  <p class="ah-sub">Tropical Taste — orders, inventory and prices</p>
 </div>
 
 <div class="wrap">
@@ -146,6 +209,14 @@ body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;pa
     <p>Sign in with the admin account using the 👤 icon in the top bar, then try again.</p>
     <button class="retry-btn" id="retryBtn">I'm signed in — try again</button>
   </div>
+
+  <!-- VIEW TABS -->
+  <div class="view-tabs" id="viewTabs">
+    <button class="view-tab active" data-view="orders">📦 Orders</button>
+    <button class="view-tab" data-view="inventory">🏷️ Inventory</button>
+  </div>
+
+  <div id="view-orders">
 
   <!-- TOOLBAR -->
   <div class="toolbar" id="toolbar">
@@ -171,6 +242,101 @@ body{font-family:var(--f-mod);overflow-x:hidden;background:#08000f;color:#fff;pa
     <div class="orders-grid" id="grid-done"></div>
     <div class="sec-empty" id="empty-done" style="display:none">No completed orders yet.</div>
   </div>
+
+  </div><!-- /view-orders -->
+
+  <!-- ══════════ INVENTORY VIEW ══════════ -->
+  <div id="view-inventory" style="display:none">
+
+    <div class="inv-toolbar">
+      <div class="fee-box">
+        <label class="f-lbl" for="feeInp">🚚 Delivery fee (CAD)</label>
+        <div style="display:flex;gap:.5rem">
+          <input class="inv-inp" id="feeInp" type="number" min="0" max="100" step="1" style="width:90px">
+          <button class="inv-btn-sm" id="feeSaveBtn">Save</button>
+        </div>
+      </div>
+      <button class="add-prod-btn" id="addProdBtn">➕ Add Product</button>
+    </div>
+
+    <div id="invList"></div>
+
+    <!-- EDITOR -->
+    <div class="editor-ov" id="editorOv">
+      <div class="editor" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+        <div class="ed-head">
+          <div class="ed-ttl" id="edTitle">Edit Product</div>
+          <button class="ed-close" id="edCloseBtn" aria-label="Close editor">✕</button>
+        </div>
+
+        <div class="ed-grid">
+          <div class="ed-field" style="grid-column:1/-1">
+            <label class="f-lbl" for="edName">Product Name *</label>
+            <input class="inv-inp" id="edName" type="text" maxlength="100" placeholder="e.g. Guava Pastelitos">
+          </div>
+          <div class="ed-field">
+            <label class="f-lbl" for="edCat">Category *</label>
+            <select class="inv-inp" id="edCat">
+              <option value="cakes">🎂 Custom Cakes</option>
+              <option value="classics">🍮 Latin Classics</option>
+              <option value="pastries">🥐 Pastries &amp; Treats</option>
+              <option value="packs">🎉 Party Packs</option>
+            </select>
+          </div>
+          <div class="ed-field">
+            <label class="f-lbl" for="edEmoji">Emoji</label>
+            <input class="inv-inp" id="edEmoji" type="text" maxlength="8" placeholder="🍰">
+          </div>
+          <div class="ed-field">
+            <label class="f-lbl" for="edBadge">Badge (optional)</label>
+            <input class="inv-inp" id="edBadge" type="text" maxlength="30" placeholder="e.g. Bestseller · New">
+          </div>
+          <div class="ed-field">
+            <label class="f-lbl" for="edTags">Tags (comma separated)</label>
+            <input class="inv-inp" id="edTags" type="text" placeholder="Traditional, GF">
+          </div>
+          <div class="ed-field" style="grid-column:1/-1">
+            <label class="f-lbl" for="edDesc">Description</label>
+            <textarea class="inv-inp" id="edDesc" maxlength="500" rows="3" placeholder="Shown on the menu card"></textarea>
+          </div>
+
+          <div class="ed-field" style="grid-column:1/-1">
+            <label class="f-lbl">Image (optional — emoji is shown if empty)</label>
+            <div class="img-row">
+              <div class="img-preview" id="imgPreview"><span id="imgPreviewEmoji">🍰</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:.5rem">
+                <input class="inv-inp" id="edImgUrl" type="text" maxlength="300" placeholder="https://… or upload a file →">
+                <div style="display:flex;gap:.5rem">
+                  <label class="inv-btn-sm" for="edImgFile" style="cursor:pointer">📁 Upload file</label>
+                  <input type="file" id="edImgFile" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
+                  <button class="inv-btn-sm" id="imgClearBtn">Remove image</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ed-field" style="grid-column:1/-1">
+            <label class="f-lbl">Sizes &amp; Prices *</label>
+            <div id="sizeRows"></div>
+            <button class="inv-btn-sm" id="addSizeBtn" style="margin-top:.5rem">➕ Add size</button>
+          </div>
+
+          <label class="ed-active" style="grid-column:1/-1">
+            <input type="checkbox" id="edActive" checked>
+            <span>Active — visible on the menu and purchasable</span>
+          </label>
+        </div>
+
+        <p class="ed-err" id="edErr"></p>
+        <div class="ed-btns">
+          <button class="ed-del" id="edDeleteBtn" style="display:none">🗑 Delete</button>
+          <button class="ed-cancel" id="edCancelBtn">Cancel</button>
+          <button class="ed-save" id="edSaveBtn">💾 Save Product</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /view-inventory -->
 
 </div>
 
@@ -279,6 +445,7 @@ async function load(){
     if(res.status === 401 || res.status === 403){
       document.getElementById('lockedBox').classList.add('on');
       document.getElementById('toolbar').classList.remove('on');
+      document.getElementById('viewTabs').classList.remove('on');
       ['new','in_progress','done'].forEach(k=>document.getElementById(`sec-${k}`).classList.remove('on'));
       return;
     }
@@ -287,6 +454,7 @@ async function load(){
     orders = data.orders;
     document.getElementById('lockedBox').classList.remove('on');
     document.getElementById('toolbar').classList.add('on');
+    document.getElementById('viewTabs').classList.add('on');
     render();
   }catch(err){
     showToast('⚠️', err.message);
@@ -331,6 +499,233 @@ document.addEventListener('click', e=>{
 
 document.getElementById('retryBtn').addEventListener('click', load);
 document.getElementById('refreshBtn').addEventListener('click', load);
+
+/* ══════════ INVENTORY ══════════ */
+const CAT_LABELS = { cakes:'🎂 Custom Cakes', classics:'🍮 Latin Classics', pastries:'🥐 Pastries & Treats', packs:'🎉 Party Packs' };
+let products = [];
+let editingId = null;   // null = creating
+
+/* View switching */
+document.querySelectorAll('.view-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.view-tab').forEach(t=>t.classList.toggle('active', t===tab));
+    const view = tab.dataset.view;
+    document.getElementById('view-orders').style.display = view==='orders' ? 'block' : 'none';
+    document.getElementById('view-inventory').style.display = view==='inventory' ? 'block' : 'none';
+    if(view==='inventory') loadInventory();
+  });
+});
+
+async function loadInventory(){
+  try{
+    const res = await fetch('/api/admin/products');
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Could not load inventory');
+    products = data.products;
+    document.getElementById('feeInp').value = data.deliveryFee;
+    renderInventory();
+  }catch(err){
+    showToast('⚠️', err.message);
+  }
+}
+
+function renderInventory(){
+  const byCat = {};
+  products.forEach(p=>{ (byCat[p.category] = byCat[p.category] || []).push(p); });
+  document.getElementById('invList').innerHTML = Object.entries(CAT_LABELS).map(([cat,label])=>{
+    const list = byCat[cat] || [];
+    if(!list.length) return '';
+    return `
+      <div class="inv-cat-hdr"><span class="inv-cat-ttl">${label}</span><span class="sec-count">${list.length}</span></div>
+      <div class="inv-grid">
+        ${list.map(p=>`
+          <div class="p-card ${p.active?'':'inactive'}">
+            <div class="p-thumb">${p.imageUrl?`<img src="${esc(p.imageUrl)}" alt="" loading="lazy">`:esc(p.emoji)}</div>
+            <div class="p-info">
+              <div class="p-nm">${esc(p.name)}
+                ${p.badge?`<span class="p-badge">${esc(p.badge)}</span>`:''}
+                ${p.active?'':'<span class="p-hidden">HIDDEN</span>'}
+              </div>
+              <div class="p-sizes">${p.sizes.map(s=>`${esc(s.label)} <strong>$${s.price}</strong>`).join(' · ')}</div>
+            </div>
+            <button class="p-edit" data-id="${p.id}">✏️ Edit</button>
+          </div>
+        `).join('')}
+      </div>`;
+  }).join('');
+}
+
+/* Delivery fee */
+document.getElementById('feeSaveBtn').addEventListener('click', async ()=>{
+  const fee = parseFloat(document.getElementById('feeInp').value);
+  try{
+    const res = await fetch('/api/admin/settings',{
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ deliveryFee: fee }),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Could not save');
+    showToast('🚚', `Delivery fee set to $${fee}`);
+  }catch(err){ showToast('⚠️', err.message); }
+});
+
+/* ── Editor ── */
+function sizeRowHtml(s = {label:'',serves:'',price:''}){
+  return `
+  <div class="size-row">
+    <input class="inv-inp sz-label" type="text" maxlength="40" placeholder='Size — e.g. 8" or 6 pack' value="${esc(s.label)}">
+    <input class="inv-inp sz-serves" type="text" maxlength="40" placeholder="Serves — e.g. Serves 8–10" value="${esc(s.serves)}">
+    <input class="inv-inp sz-price" type="number" min="0.5" max="2000" step="0.5" placeholder="$" value="${s.price}">
+    <button class="size-rm" aria-label="Remove size">✕</button>
+  </div>`;
+}
+
+function setPreview(url, emoji){
+  const box = document.getElementById('imgPreview');
+  box.innerHTML = url ? `<img src="${esc(url)}" alt="">` : `<span id="imgPreviewEmoji">${esc(emoji || '🍰')}</span>`;
+}
+
+function openEditor(p){
+  editingId = p ? p.id : null;
+  document.getElementById('edTitle').textContent = p ? `Edit — ${p.name}` : 'New Product';
+  document.getElementById('edName').value  = p?.name || '';
+  document.getElementById('edCat').value   = p?.category || 'pastries';
+  document.getElementById('edEmoji').value = p?.emoji || '';
+  document.getElementById('edBadge').value = p?.badge || '';
+  document.getElementById('edTags').value  = (p?.tags || []).join(', ');
+  document.getElementById('edDesc').value  = p?.description || '';
+  document.getElementById('edImgUrl').value = p?.imageUrl || '';
+  document.getElementById('edActive').checked = p ? p.active : true;
+  document.getElementById('sizeRows').innerHTML =
+    (p?.sizes?.length ? p.sizes : [{label:'',serves:'',price:''}]).map(sizeRowHtml).join('');
+  setPreview(p?.imageUrl, p?.emoji);
+  document.getElementById('edErr').classList.remove('on');
+  const del = document.getElementById('edDeleteBtn');
+  del.style.display = p ? 'block' : 'none';
+  del.dataset.confirmed = '';
+  del.textContent = '🗑 Delete';
+  document.getElementById('editorOv').classList.add('on');
+}
+
+function closeEditor(){ document.getElementById('editorOv').classList.remove('on'); }
+
+function collectForm(){
+  const sizes = [...document.querySelectorAll('#sizeRows .size-row')].map(row=>({
+    label:  row.querySelector('.sz-label').value.trim(),
+    serves: row.querySelector('.sz-serves').value.trim(),
+    price:  parseFloat(row.querySelector('.sz-price').value),
+  })).filter(s=>s.label || !isNaN(s.price));
+  return {
+    name:        document.getElementById('edName').value.trim(),
+    category:    document.getElementById('edCat').value,
+    emoji:       document.getElementById('edEmoji').value.trim() || '🍰',
+    badge:       document.getElementById('edBadge').value.trim(),
+    tags:        document.getElementById('edTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    description: document.getElementById('edDesc').value.trim(),
+    imageUrl:    document.getElementById('edImgUrl').value.trim(),
+    active:      document.getElementById('edActive').checked,
+    sizes,
+  };
+}
+
+function edError(msg){
+  const el = document.getElementById('edErr');
+  el.textContent = msg;
+  el.classList.add('on');
+}
+
+async function saveProduct(){
+  const btn = document.getElementById('edSaveBtn');
+  const body = collectForm();
+  if(!body.name) return edError('Please enter a product name.');
+  if(!body.sizes.length || body.sizes.some(s=>!s.label || isNaN(s.price))) return edError('Every size needs a label and a price.');
+  btn.disabled = true;
+  try{
+    const res = await fetch(editingId ? `/api/admin/products/${editingId}` : '/api/admin/products', {
+      method: editingId ? 'PUT' : 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Could not save');
+    closeEditor();
+    showToast('📦', editingId ? `${body.name} updated` : `${body.name} added to the menu`);
+    await loadInventory();
+  }catch(err){ edError(err.message); }
+  finally{ btn.disabled = false; }
+}
+
+async function deleteProduct(){
+  const btn = document.getElementById('edDeleteBtn');
+  if(btn.dataset.confirmed !== '1'){
+    btn.dataset.confirmed = '1';
+    btn.textContent = '⚠️ Click again to delete forever';
+    setTimeout(()=>{ btn.dataset.confirmed=''; btn.textContent='🗑 Delete'; }, 3000);
+    return;
+  }
+  try{
+    const res = await fetch(`/api/admin/products/${editingId}`,{ method:'DELETE' });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Could not delete');
+    closeEditor();
+    showToast('🗑', 'Product deleted');
+    await loadInventory();
+  }catch(err){ edError(err.message); }
+}
+
+/* Image upload → base64 → server saves the file and returns /uploads/... */
+document.getElementById('edImgFile').addEventListener('change', function(){
+  const file = this.files[0];
+  this.value = '';
+  if(!file) return;
+  if(file.size > 3*1024*1024) return edError('Image too large (max 3 MB).');
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    try{
+      showToast('⏳','Uploading image…');
+      const res = await fetch('/api/admin/upload-image',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ data: reader.result }),
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || 'Upload failed');
+      document.getElementById('edImgUrl').value = data.url;
+      setPreview(data.url);
+      showToast('🖼️','Image uploaded!');
+    }catch(err){ edError(err.message); }
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('edImgUrl').addEventListener('input', function(){
+  setPreview(this.value.trim(), document.getElementById('edEmoji').value.trim());
+});
+document.getElementById('imgClearBtn').addEventListener('click', ()=>{
+  document.getElementById('edImgUrl').value = '';
+  setPreview('', document.getElementById('edEmoji').value.trim());
+});
+
+/* Inventory delegated clicks */
+document.getElementById('invList').addEventListener('click', e=>{
+  const btn = e.target.closest('.p-edit');
+  if(!btn) return;
+  const p = products.find(x=>x.id === Number(btn.dataset.id));
+  if(p) openEditor(p);
+});
+document.getElementById('sizeRows').addEventListener('click', e=>{
+  const rm = e.target.closest('.size-rm');
+  if(rm && document.querySelectorAll('#sizeRows .size-row').length > 1) rm.closest('.size-row').remove();
+});
+document.getElementById('addSizeBtn').addEventListener('click', ()=>{
+  document.getElementById('sizeRows').insertAdjacentHTML('beforeend', sizeRowHtml());
+});
+document.getElementById('addProdBtn').addEventListener('click', ()=>openEditor(null));
+document.getElementById('edCloseBtn').addEventListener('click', closeEditor);
+document.getElementById('edCancelBtn').addEventListener('click', closeEditor);
+document.getElementById('edSaveBtn').addEventListener('click', saveProduct);
+document.getElementById('edDeleteBtn').addEventListener('click', deleteProduct);
+document.getElementById('editorOv').addEventListener('click', e=>{ if(e.target === e.currentTarget) closeEditor(); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeEditor(); });
 
 document.getElementById('hamburger').addEventListener('click',function(){
   this.classList.toggle('open');

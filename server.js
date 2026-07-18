@@ -1,11 +1,13 @@
 require('dotenv').config();
 const express      = require('express');
 const path         = require('path');
+const fs           = require('fs');
 const crypto       = require('crypto');
 const bcrypt       = require('bcryptjs');
 const cookieParser = require('cookie-parser');
 const db           = require('./db');
-const { DELIVERY_FEE, PRODUCTS, CUSTOM_DESIGNS, lookupPrice } = require('./prices');
+const catalog = require('./catalog');   // DB-backed inventory (seeded from prices.js)
+const { lookupPrice, getDeliveryFee } = catalog;
 
 const app  = express();
 const PORT     = process.env.PORT || 3000;
@@ -160,12 +162,12 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), (req,
 });
 
 // ── MIDDLEWARE ──────────────────────────────────────────────
-app.use(express.json());
+app.use(express.json({ limit: '4mb' }));   // 4mb: admin image uploads arrive as base64 JSON
 app.use(cookieParser());
 
 // Block server-side files from being served publicly by express.static
 app.use((req, res, next) => {
-  const blocked = /^\/(data|node_modules)(\/|$)|^\/(server\.js|db\.js|prices\.js|package(-lock)?\.json|CLAUDE\.md)$/i;
+  const blocked = /^\/(data|node_modules)(\/|$)|^\/(server\.js|db\.js|prices\.js|catalog\.js|package(-lock)?\.json|CLAUDE\.md)$/i;
   if (blocked.test(req.path)) return res.status(404).end();
   next();
 });
@@ -173,14 +175,9 @@ app.use(express.static(path.join(__dirname)));   // serves index.html, menu.html
 
 // ── ENDPOINTS ──────────────────────────────────────────────
 
-// GET /api/prices — canonical price list for all pages
+// GET /api/prices — canonical price list + full catalog for all pages
 app.get('/api/prices', (req, res) => {
-  res.json({
-    success:       true,
-    deliveryFee:   DELIVERY_FEE,
-    products:      PRODUCTS,
-    customDesigns: CUSTOM_DESIGNS,
-  });
+  res.json({ success: true, ...catalog.publicPriceList() });
 });
 
 // GET /api/stripe-config — frontend fetches the publishable key from here
@@ -224,7 +221,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'cad',
           product_data: { name: 'Delivery — Calgary area' },
-          unit_amount: DELIVERY_FEE * 100,
+          unit_amount: getDeliveryFee() * 100,
         },
         quantity: 1,
       });
@@ -667,6 +664,146 @@ app.patch('/api/admin/orders/:orderNumber', (req, res) => {
   res.json({ success: true });
 });
 
+// ── ADMIN · INVENTORY ──────────────────────────────────────
+const UPLOADS_DIR = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR);
+
+function validateProduct(b) {
+  if (typeof b.name !== 'string' || b.name.trim().length < 2 || b.name.length > 100) return 'Name must be 2–100 characters';
+  if (!catalog.CATEGORIES.includes(b.category)) return `Category must be one of: ${catalog.CATEGORIES.join(', ')}`;
+  if (b.emoji !== undefined && (typeof b.emoji !== 'string' || b.emoji.length > 8)) return 'Invalid emoji';
+  if (b.description !== undefined && (typeof b.description !== 'string' || b.description.length > 500)) return 'Description too long (max 500)';
+  if (b.badge !== undefined && (typeof b.badge !== 'string' || b.badge.length > 30)) return 'Badge too long (max 30)';
+  if (b.tags !== undefined && (!Array.isArray(b.tags) || b.tags.length > 10 || b.tags.some(t => typeof t !== 'string' || t.length > 30))) return 'Tags must be up to 10 short strings';
+  if (b.imageUrl !== undefined && b.imageUrl !== '' && !(typeof b.imageUrl === 'string' && b.imageUrl.length <= 300 && (/^\/uploads\//.test(b.imageUrl) || /^https?:\/\//.test(b.imageUrl)))) return 'Image must be an /uploads/ path or an http(s) URL';
+  if (!Array.isArray(b.sizes) || b.sizes.length < 1 || b.sizes.length > 10) return 'Add between 1 and 10 sizes';
+  for (const s of b.sizes) {
+    if (typeof s.label !== 'string' || !s.label.trim() || s.label.length > 40) return 'Each size needs a label (max 40 chars)';
+    if (s.serves !== undefined && (typeof s.serves !== 'string' || s.serves.length > 40)) return 'Serves text too long (max 40)';
+    if (typeof s.price !== 'number' || !isFinite(s.price) || s.price < 0.5 || s.price > 2000) return 'Each size needs a price between $0.50 and $2000';
+  }
+  return null;
+}
+
+function productParams(b) {
+  return {
+    name:        b.name.trim(),
+    category:    b.category,
+    emoji:       b.emoji || '🍰',
+    description: b.description || '',
+    tags:        JSON.stringify(b.tags || []),
+    image_url:   b.imageUrl || '',
+    badge:       b.badge || '',
+    sizes:       JSON.stringify(b.sizes.map(s => ({ label: s.label.trim(), serves: s.serves || '', price: s.price }))),
+    active:      b.active === false ? 0 : 1,
+  };
+}
+
+// GET /api/admin/products — full inventory, including hidden items
+app.get('/api/admin/products', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  res.json({ success: true, products: catalog.listProducts(true), deliveryFee: getDeliveryFee(), categories: catalog.CATEGORIES });
+});
+
+// POST /api/admin/products — create a product
+app.post('/api/admin/products', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const err = validateProduct(req.body || {});
+  if (err) return res.status(400).json({ success: false, error: err });
+  try {
+    const p = productParams(req.body);
+    const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order),0) m FROM products WHERE category = ?').get(p.category).m;
+    const info = db.prepare(`
+      INSERT INTO products (name, category, emoji, description, tags, image_url, badge, sizes, active, sort_order)
+      VALUES (@name, @category, @emoji, @description, @tags, @image_url, @badge, @sizes, @active, @sort)
+    `).run({ ...p, sort: maxOrder + 1 });
+    console.log(`📦  Inventory: created "${p.name}"`);
+    res.status(201).json({ success: true, id: info.lastInsertRowid });
+  } catch (e) {
+    if (String(e.message).includes('UNIQUE')) {
+      return res.status(409).json({ success: false, error: 'A product with that name already exists' });
+    }
+    console.error('❌  create product:', e.message);
+    res.status(500).json({ success: false, error: 'Could not create the product' });
+  }
+});
+
+// PUT /api/admin/products/:id — update a product
+app.put('/api/admin/products/:id', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const err = validateProduct(req.body || {});
+  if (err) return res.status(400).json({ success: false, error: err });
+  try {
+    const p = productParams(req.body);
+    const info = db.prepare(`
+      UPDATE products SET name=@name, category=@category, emoji=@emoji, description=@description,
+        tags=@tags, image_url=@image_url, badge=@badge, sizes=@sizes, active=@active,
+        updated_at=CURRENT_TIMESTAMP
+      WHERE id=@id
+    `).run({ ...p, id: Number(req.params.id) });
+    if (info.changes === 0) return res.status(404).json({ success: false, error: 'Product not found' });
+    console.log(`📦  Inventory: updated "${p.name}"`);
+    res.json({ success: true });
+  } catch (e) {
+    if (String(e.message).includes('UNIQUE')) {
+      return res.status(409).json({ success: false, error: 'A product with that name already exists' });
+    }
+    console.error('❌  update product:', e.message);
+    res.status(500).json({ success: false, error: 'Could not update the product' });
+  }
+});
+
+// DELETE /api/admin/products/:id — permanently remove (use active=false to just hide)
+app.delete('/api/admin/products/:id', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const info = db.prepare('DELETE FROM products WHERE id = ?').run(Number(req.params.id));
+  if (info.changes === 0) return res.status(404).json({ success: false, error: 'Product not found' });
+  console.log(`📦  Inventory: deleted product #${req.params.id}`);
+  res.json({ success: true });
+});
+
+// PUT /api/admin/settings — currently just the delivery fee
+app.put('/api/admin/settings', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const fee = req.body?.deliveryFee;
+  if (typeof fee !== 'number' || !isFinite(fee) || fee < 0 || fee > 100) {
+    return res.status(400).json({ success: false, error: 'Delivery fee must be between $0 and $100' });
+  }
+  catalog.setDeliveryFee(fee);
+  console.log(`📦  Inventory: delivery fee set to $${fee}`);
+  res.json({ success: true });
+});
+
+// POST /api/admin/upload-image — base64 data URL → file in /uploads
+const IMAGE_TYPES = {
+  'ffd8ff':   'jpg',
+  '89504e47': 'png',
+  '47494638': 'gif',
+  '52494646': 'webp',   // RIFF container — checked further below
+};
+app.post('/api/admin/upload-image', (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const dataUrl = req.body?.data;
+  if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
+    return res.status(400).json({ success: false, error: 'Send { data: "data:image/...;base64,..." }' });
+  }
+  const base64 = dataUrl.split(',')[1] || '';
+  const buf = Buffer.from(base64, 'base64');
+  if (buf.length < 100) return res.status(400).json({ success: false, error: 'Image is empty or corrupt' });
+  if (buf.length > 3 * 1024 * 1024) return res.status(400).json({ success: false, error: 'Image too large (max 3 MB)' });
+
+  // Validate real content by magic bytes, not by the claimed MIME type
+  const head = buf.subarray(0, 4).toString('hex');
+  let ext = Object.entries(IMAGE_TYPES).find(([magic]) => head.startsWith(magic))?.[1];
+  if (ext === 'webp' && buf.subarray(8, 12).toString('ascii') !== 'WEBP') ext = undefined;
+  if (!ext) return res.status(400).json({ success: false, error: 'Only JPG, PNG, GIF or WebP images are allowed' });
+
+  const filename = `img_${Date.now()}_${crypto.randomBytes(4).toString('hex')}.${ext}`;
+  fs.writeFileSync(path.join(UPLOADS_DIR, filename), buf);
+  console.log(`🖼️   Inventory: image uploaded → /uploads/${filename} (${(buf.length / 1024).toFixed(0)} KB)`);
+  res.status(201).json({ success: true, url: `/uploads/${filename}` });
+});
+
 // POST /api/orders — records e-Transfer orders (guest or signed in);
 // creates a guest profile for unknown emails so history is kept either way
 app.post('/api/orders', (req, res) => {
@@ -681,7 +818,7 @@ app.post('/api/orders', (req, res) => {
     }
 
     const subtotalCents = items.reduce((s, it) => s + Math.round(it.price * 100) * it.qty, 0);
-    const totalCents    = subtotalCents + (delivery?.mode === 'delivery' ? DELIVERY_FEE * 100 : 0);
+    const totalCents    = subtotalCents + (delivery?.mode === 'delivery' ? getDeliveryFee() * 100 : 0);
     const orderNumber   = 'TT-' + Date.now().toString().slice(-6);
 
     recordOrder({

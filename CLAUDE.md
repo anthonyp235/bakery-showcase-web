@@ -50,7 +50,9 @@ mi-proyecto-ia/
 ├── admin.html       # Admin order dashboard (needs ADMIN_EMAIL account)
 ├── account.js       # Shared auth widget: 👤 icon/dropdown, login, orders, cart sync
 ├── db.js            # SQLite setup + schema (users, sessions, carts, orders)
-├── prices.js        # Canonical price list — edit prices HERE (never in HTML)
+├── prices.js        # Seed price list — used ONLY to populate the DB the first time
+├── catalog.js       # Inventory service: seeding, price lookups, delivery fee (DB-backed)
+├── uploads/         # Product images uploaded from the admin panel — gitignored
 ├── data/            # tropical.db lives here — gitignored
 └── CLAUDE.md        # This file
 ```
@@ -131,6 +133,7 @@ mi-proyecto-ia/
 - **Access**: the account whose email equals `ADMIN_EMAIL` in `.env` (default `admin@tropicaltaste.ca`) — register that email normally, then the 👤 dropdown shows a "🛠️ Admin Panel" link; `publicUser()` exposes `isAdmin`
 - **Endpoints**: `GET /api/admin/orders` (all orders + customer join), `PATCH /api/admin/orders/:orderNumber` `{fulfillment}` — both 403 for non-admins
 - **Workflow column**: `orders.fulfillment` = `new → in_progress → delivered | cancelled` (separate from payment `status`); added via PRAGMA migration in db.js
+- **Two tabs**: 📦 Orders and 🏷️ Inventory (product CRUD — see Prices & Inventory section)
 - **Sections**: New/Unreviewed · In Progress · Completed (delivered + cancelled greyed out)
 - **Per-order actions** (⚙️ Actions toggle): email/call customer (mailto/tel), start (→ in_progress), confirm delivered, cancel (two-click confirm), reopen/restore
 - **Auto-refresh**: every 30s + manual ↻ button; shows totals + paid revenue in toolbar
@@ -159,12 +162,16 @@ mi-proyecto-ia/
 
 ---
 
-## Prices (server-side source of truth)
-- **`prices.js`** — canonical price list: `PRODUCTS` (name → {sizeLabel: price}), `CUSTOM_DESIGNS` (customizer design → product name), `DELIVERY_FEE`; blocked from static serving
-- **`GET /api/prices`** returns the whole list; pages fetch it on load (embedded prices in HTML are offline fallback only)
-- **Checkout is tamper-proof**: `repriceItems()` in both `/api/create-checkout-session` and `/api/orders` replaces client-sent prices with canonical ones by exact full-name lookup (`"Red Velvet Cake (8\")"`); unknown product names → 400
-- **Frontend consumers**: menu.html re-renders grid with server prices; customize.html re-prices size buttons per design (velvet costs more) + "From $X" labels; cart.html re-prices stored localStorage items (toast if changed) and updates the delivery fee label
-- **To change a price**: edit `prices.js`, restart server (nodemon does it) — all pages + checkout pick it up; no HTML edits needed
+## Prices & Inventory (DB is the source of truth)
+- **`products` table** (SQLite) — the canonical catalog: name (UNIQUE), category (`cakes|classics|pastries|packs`), emoji, description, tags (JSON), image_url, badge, sizes (JSON `[{label, serves, price}]`), active, sort_order. `settings` table holds `delivery_fee`
+- **`catalog.js`** — inventory service: seeds the table from `prices.js` ONLY when empty (delete `data/tropical.db` to re-seed), exposes `publicPriceList()`, `lookupPrice()`, `getDeliveryFee()`; **`prices.js` is now just the seed** — real edits happen in the admin panel
+- **`GET /api/prices`** returns `{deliveryFee, products (name→{label:price}), customDesigns, catalog (grouped full products)}`
+- **Admin inventory** (admin.html → 🏷️ Inventory tab): full CRUD — add/edit/delete products, sizes/prices rows, emoji, badge, tags, description, active toggle (hide from menu without deleting), delivery fee editor
+- **Images**: paste an external URL or upload a file (client sends base64 JSON → `POST /api/admin/upload-image` validates magic bytes (JPG/PNG/GIF/WebP, 3MB max) → saved to `uploads/` (gitignored) → served statically); menu card shows the image, else the emoji
+- **Endpoints**: `GET|POST /api/admin/products`, `PUT|DELETE /api/admin/products/:id`, `PUT /api/admin/settings` — all admin-only
+- **Checkout is tamper-proof**: `repriceItems()` in `/api/create-checkout-session` and `/api/orders` replaces client-sent prices via exact full-name lookup against ACTIVE products (`"Red Velvet Cake (8\")"`); unknown/hidden products → 400
+- **Frontend consumers**: menu.html rebuilds its whole grid from `catalog` (new admin-created products appear automatically; embedded MENU is offline fallback); customize.html re-prices size buttons per design; cart.html re-prices stored items + delivery fee
+- **To change a price**: admin panel → Inventory → Edit → save. Takes effect immediately (no restart)
 
 ---
 

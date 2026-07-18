@@ -50,8 +50,29 @@ CREATE TABLE IF NOT EXISTS orders (
   created_at     TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS products (
+  id          INTEGER PRIMARY KEY,
+  name        TEXT NOT NULL UNIQUE,
+  category    TEXT NOT NULL DEFAULT 'pastries',
+  emoji       TEXT NOT NULL DEFAULT '🍰',
+  description TEXT NOT NULL DEFAULT '',
+  tags        TEXT NOT NULL DEFAULT '[]',
+  image_url   TEXT NOT NULL DEFAULT '',
+  badge       TEXT NOT NULL DEFAULT '',
+  sizes       TEXT NOT NULL DEFAULT '[]',
+  active      INTEGER NOT NULL DEFAULT 1,
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  updated_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_orders_user    ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_exp   ON sessions(expires_at);
+CREATE INDEX IF NOT EXISTS idx_products_cat   ON products(category, sort_order);
 `);
 
 // Migration: admin workflow state, separate from payment status.

@@ -280,9 +280,9 @@ function renderMenu(){
     if(!container) return;
     container.innerHTML = items.map((item,i)=>`
       <div class="prod-card">
-        <div class="prod-img ${item.imgClass}">
+        <div class="prod-img ${item.imgClass||'prod-img-default'}">
           ${item.badge?`<div class="prod-badge">${item.badge}</div>`:''}
-          ${item.emoji}
+          ${item.img?`<img src="${item.img}" alt="${item.name}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`:item.emoji}
         </div>
         <div class="prod-info">
           <div class="prod-nm">${item.name}</div>
@@ -401,23 +401,30 @@ function checkHash(){
   }
 }
 
-/* ── SERVER PRICES ── */
-/* The embedded prices above are only a fallback — the server list
-   (prices.js → GET /api/prices) is the source of truth. */
+/* ── SERVER CATALOG ── */
+/* The embedded MENU above is only an offline fallback — the inventory
+   database (admin panel → GET /api/prices) is the source of truth. */
 async function loadPrices(){
   try{
     const res = await fetch('/api/prices');
     if(!res.ok) return;
     const data = await res.json();
-    Object.values(MENU).forEach(items=>{
-      items.forEach(item=>{
-        const sizes = data.products[item.name];
-        if(!sizes) return;
-        item.sizes.forEach(s=>{ if(sizes[s.l] !== undefined) s.p = sizes[s.l]; });
-      });
+    if(!data.catalog) return;
+    Object.keys(MENU).forEach(cat=>{
+      if(!data.catalog[cat]) return;
+      MENU[cat] = data.catalog[cat].map(p=>({
+        name:  p.name,
+        emoji: p.emoji,
+        desc:  p.description,
+        tags:  p.tags,
+        badge: p.badge || undefined,
+        img:   p.imageUrl || '',
+        imgClass: 'prod-img-default',
+        sizes: p.sizes.map(s=>({ l:s.label, srv:s.serves, p:s.price })),
+      }));
     });
     renderMenu();
-  }catch(err){ /* server offline — embedded prices stay */ }
+  }catch(err){ /* server offline — embedded catalog stays */ }
 }
 
 renderMenu();
