@@ -49,6 +49,7 @@ mi-proyecto-ia/
 ├── register.html    # Create-account page
 ├── admin.html       # Admin order dashboard (needs ADMIN_EMAIL account)
 ├── account.js       # Shared auth widget: 👤 icon/dropdown, login, orders, cart sync
+├── chat.js          # Floating chat widget (bottom-right) — keyword bot, upgrade hook: getBotReply()
 ├── db.js            # SQLite setup + schema (users, sessions, carts, orders)
 ├── prices.js        # Seed price list — used ONLY to populate the DB the first time
 ├── catalog.js       # Inventory service: seeding, price lookups, delivery fee (DB-backed)
@@ -209,6 +210,7 @@ mi-proyecto-ia/
 - [ ] **Google Maps embed** — placeholder box, not a real map
 - [ ] **Product photos** — all product cards use emoji, need real food photography
 - [ ] **Promo codes** — input exists in cart but has no logic
+- [ ] **Chat bot backend** — chat.js currently answers with client-side keyword matching (`getBotReply()`); swap that function for a server endpoint (e.g. Claude API) when ready
 - [ ] **Input sanitization / form validation** — basic required-field checks only
 
 ---
